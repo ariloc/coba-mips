@@ -1,3 +1,4 @@
 - Espacio adicional innecesario al comienzo de la página 3.
 - Página 3, hay un espacio adicional después de "Carga en el simulador el código provisto" (quedando el punto final en la próxima línea). Además, podría ser mejor resaltado para demarcar que los ejercicios siguientes se relacionan a cargar el código en cuestión al simulador.
-
+- Página 4: "La directiva .byte valor inicializa una posición de memoria, de tamaño byte..." No debería ser algo como "del tamaño de un byte"?
+- Página 4: Falta de explicación de little y big endian (aunque puede ser a propósito para investigar)
