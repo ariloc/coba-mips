@@ -5,36 +5,43 @@
 \usepackage{parskip}
 \usepackage[colorlinks=true,urlcolor=blue,linkcolor=black]{hyperref}
 \usepackage{url}
-\usepackage{booktabs}
 \usepackage{float}
-\usepackage{adjustbox}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{geometry}
-\usepackage{subfig}
 \usepackage{caption}
 \usepackage{wrapfig}
-\usepackage{float}
-\usepackage{multicol}
-\usepackage{tcolorbox}
 \usepackage{fancyvrb}
-\usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{lmodern}
 \usepackage{color,array}
 \usepackage{etoolbox}
 \usepackage{minted}
+\usepackage{xpatch}
+\usepackage{subfig}
+\usepackage{colortbl}
+
+% mips-lexer.py HAS TO HAVE execution permissions for this to work
+% minted uses which to detect the file:
+% https://github.com/gpoore/minted/blob/d46f1ba2d248f2f3504bcc795dd39c613bd3c5a0/source/minted.sty#L197
+\renewcommand{\MintedPygmentize}{./mips-lexer.py}
 
 \makeatletter
 \patchcmd{\@makechapterhead}{\vspace*{50\p@}}{}{}{}% Removes space above \chapter head
 \patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{}{}{}% Removes space above \chapter* head
 \makeatother
 
+\xpretocmd{\chapter}{\setcounter{section}{0}}{}{}
+
 \unaccentedoperators
+
+\definecolor{autumn-red-pyg}{HTML}{AA0000}
+\definecolor{autumn-blue-pyg}{HTML}{0000AA}
+\definecolor{autumn-gray-pyg}{HTML}{AAAAAA}
+\definecolor{autumn-teal-pyg}{HTML}{00AAAA}
 
 \setlength{\textfloatsep}{0pt}
 \counterwithout{section}{chapter}
-\usemintedstyle{murphy}
+\usemintedstyle{default}
 
 \title{\Huge{}\texttt{MIPS R2000}\\\vspace{8pt}\Large{}\textbf{\scalebox{.85}[1.0]{Práctica 1}}}
 \author{Ariel Leonardo Fideleff}
@@ -54,7 +61,7 @@
 
 \subsection*{1.1 y 1.2}
 
-Como podemos ver en la Figura \ref{fig:c1-1}, los dos números enteros reservados en el programa se ubicaron en las posiciones \texttt{0x10010000} y \texttt{0x10010004}, distanciados justamente por 4 bytes ya que se corresponde con el tamaño de palabra. Es decir, si cada entero fue reservado como un \mintinline{gas}{.word}, cada uno ocupa 4 bytes. Con esto, sumado a que el ensamblador los coloca uno seguido del otro en la memoria, dado que el primer valor por defecto comienza en la posición \texttt{0x10010000}, el segundo necesariamente deberá ubicarse 4 posiciones de memoria después (cada posición se corresponde con un byte).
+Como podemos ver en la Figura \ref{fig:c1-1}, los dos números enteros reservados en el programa se ubicaron en las posiciones \texttt{0x10010000} y \texttt{0x10010004}, distanciados justamente por 4 bytes ya que se corresponde con el tamaño de palabra. Es decir, si cada entero fue reservado como un \mintinline{mips}{.word}, cada uno ocupa 4 bytes. Con esto, sumado a que el ensamblador los coloca uno seguido del otro en la memoria, dado que el primer valor por defecto comienza en la posición \texttt{0x10010000}, el segundo necesariamente deberá ubicarse 4 posiciones de memoria después (cada posición se corresponde con un byte).
 
 En cuanto a los valores como tal, podemos ver la diferencia en que hayamos indicado uno en decimal, mientras el otro en hexadecimal. De esta forma, el número 15 en decimal es representado como \texttt{0x0000000f} en hexa, forma con la cual se presenta en el panel de datos. Mientras, el segundo valor, al haber sido especificado en el programa en base 16, lo reconocemos fácilmente como \texttt{0x00000015} en el panel en cuestión.
 
@@ -88,7 +95,7 @@ Al ensamblar el programa dado, no parece presentar ninguna diferencia con respec
 El siguiente código cumple con la consigna planteada:
 
 \vspace{7pt}
-\inputminted[linenos]{gas}{src/cuestiones/c1-5.asm}
+\inputminted[linenos]{mips}{src/cuestiones/c1-5.asm}
 \vspace{7pt}
 
 Y en la Figura \ref{fig:arr5-mem} podemos comprobar que los valores fueron almacenados de forma correcta, considerando que los números 30 y 60 en decimal se corresponden con \texttt{0x0000001e} y \texttt{0x0000003c} en hexadecimal, respectivamente.
@@ -113,11 +120,12 @@ Notar que al haber cambiado la dirección de memoria inicial donde se quiere que
 \end{figure}
 
 \subsection*{1.6}
+\label{sec:c1-6}
 
-Podemos probar cambiar el argumento de la directiva \mintinline{gas}{.data} para intentar almacenar los datos partiendo desde la dirección \texttt{0x10000002}:
+Podemos probar cambiar el argumento de la directiva \mintinline{mips}{.data} para intentar almacenar los datos partiendo desde la dirección \texttt{0x10000002}:
 
 \vspace{7pt}
-\inputminted[linenos]{gas}{src/cuestiones/c1-6.asm}
+\inputminted[linenos]{mips}{src/cuestiones/c1-6.asm}
 \vspace{7pt}
 
 Hecho este cambio, el panel de datos nos muestra que los valores ahora son almacenados partiendo desde la dirección de memoria \texttt{0x10000004}, saltando de 4 en 4 (por el tamaño de palabra, Fig. \ref{fig:not-multiple}).
@@ -126,7 +134,7 @@ Hecho este cambio, el panel de datos nos muestra que los valores ahora son almac
     \centering
     \captionsetup{justification = centering}
     \includegraphics[width=.8\linewidth]{img/c1-6}
-    \caption{Valores y respectivas posiciones de memoria del programa con argumento de \mintinline{gas}{.data} modificado}
+    \caption{Valores y respectivas posiciones de memoria del programa con argumento de \mintinline{mips}{.data} modificado}
     \label{fig:not-multiple}
 \end{figure}
 
@@ -148,7 +156,7 @@ Con esto en cuenta, el ensamblador, sabiendo que indicamos el espacio para datos
     \label{fig:c1-7}
 \end{wrapfigure}
 
-Como ya sabemos, al no especificar ningún argumento para la directiva \mintinline{gas}{.data}, los datos se ubicarán partiendo desde la dirección de memoria \texttt{0x10010000} por defecto.
+Como ya sabemos, al no especificar ningún argumento para la directiva \mintinline{mips}{.data}, los datos se ubicarán partiendo desde la dirección de memoria \texttt{0x10010000} por defecto.
 
 Además, al tratarse de un único byte, y considerando que el valor indicado \texttt{0x10} no supera el tamaño permitido por la directiva (el máximo valor posible sería \texttt{0xFF}), éste se almacenaría ``al comienzo de la palabra'', efectivamente implicando que el valor de la palabra que contiene el byte sea el mismo al especificado. Al fin y al cabo, el tamaño de una palabra es mayor al de un byte (justamente, 4 bytes), por lo que resulta en que el valor de la palabra sea el mismo al valor del tamaño de un byte, antecedido por 0s que no cambian el entero final almacenado.
 
@@ -156,25 +164,25 @@ Además, al tratarse de un único byte, y considerando que el valor indicado \te
 
 En este caso, se almacenan los valores \textbf{\texttt{0x40302010}} y \textbf{\texttt{0x10203040}} en las posiciones de memoria \textbf{\texttt{0x10010000}} y \textbf{\texttt{0x10010004}} respectivamente.
 
-Si bien el segundo valor es indicado como tal de forma explícita en el código presentado, el primer valor, en cambio, es el resultado de almacenar un vector de 4 valores especificados del tamaño de 1 byte. Esto nos muestra que el simulador, por un lado, almacena los valores indicados con la directiva \mintinline{gas}{.byte} de forma contigua, independientemente de que los valores sean accedidos de a una palabra a la vez. Por otro lado, nos indica también el orden que utiliza para guardar los datos dentro de una palabra, el cual puede ser identificado afín con el concepto de \textit{Little-Endian}, el cual consiste en la organización y alineamiento de los datos de forma que, aplicado a este caso, ``lo que va primero'' se almacene en las direcciones de memoria más bajas, y así en adelante.\footnote{Más formalmente, el concepto de \textit{Little Endian} hace referencia a que los bytes menos significativos dentro de una palabra sean almacenados en posiciones de memoria más chicas, relacionándose principalmente con la forma en la que se \textit{internamente} se manejan y ordenan los bytes de una palabra.}
+Si bien el segundo valor es indicado como tal de forma explícita en el código presentado, el primer valor, en cambio, es el resultado de almacenar un vector de 4 valores especificados del tamaño de 1 byte. Esto nos muestra que el simulador, por un lado, almacena los valores indicados con la directiva \mintinline{mips}{.byte} de forma contigua, independientemente de que los valores sean accedidos de a una palabra a la vez. Por otro lado, nos indica también el orden que utiliza para guardar los datos dentro de una palabra, el cual puede ser identificado afín con el concepto de \textit{Little-Endian}, el cual consiste en la organización y alineamiento de los datos de forma que, aplicado a este caso, ``lo que va primero'' se almacene en las direcciones de memoria más bajas, y así en adelante.\footnote{Más formalmente, el concepto de \textit{Little Endian} hace referencia a que los bytes menos significativos dentro de una palabra sean almacenados en posiciones de memoria más chicas, relacionándose principalmente con la forma en la que se \textit{internamente} se manejan y ordenan los bytes de una palabra.}
 
 Esta conclusión la podemos obtener partiendo, primero, en que sabemos que el valor presentado en el panel de datos de una palabra \texttt{0xXXXXXXXX}, se corresponde con la representación en hexadecimal de los bytes en posiciones de memoria menores a mayores, interpretadas de derecha a izquierda. Para probar esto, podemos modificar el programa descripto para la consigna, y especificar que los datos se ubiquen partiendo desde la dirección de memoria \texttt{0x10010002}:
 
 \vspace{7pt}
-\inputminted[linenos]{gas}{src/cuestiones/c1-10.asm}
+\inputminted[linenos]{mips}{src/cuestiones/c1-10.asm}
 \vspace{7pt}
 
-Con este cambio, la palabra en la dirección \texttt{0x10010000} almacena ahora el valor \texttt{0x20100000}, a la vez que la palabra en la dirección \texttt{0x10010004} almacena los dos valores restantes del vector de \mintinline{gas}{.byte} (valor \texttt{0x00004030}, ver Fig. \ref{fig:bytes-shift-endian}), demostrando cómo los bytes se corrieron dos posiciones desde la derecha (posiciones como bytes, que en hexadecimal se corresponde con dos dígitos, así representando un espacio de 4 dígitos para haber cambiado la dirección de memoria de \mintinline{gas}{.data} dos posiciones adelante de la usada por defecto).
+Con este cambio, la palabra en la dirección \texttt{0x10010000} almacena ahora el valor \texttt{0x20100000}, a la vez que la palabra en la dirección \texttt{0x10010004} almacena los dos valores restantes del vector de \mintinline{mips}{.byte} (valor \texttt{0x00004030}, ver Fig. \ref{fig:bytes-shift-endian}), demostrando cómo los bytes se corrieron dos posiciones desde la derecha (posiciones como bytes, que en hexadecimal se corresponde con dos dígitos, así representando un espacio de 4 dígitos para haber cambiado la dirección de memoria de \mintinline{mips}{.data} dos posiciones adelante de la usada por defecto).
 
 \begin{figure}[h]
     \centering
     \captionsetup{justification = centering}
     \includegraphics[width=.4\linewidth]{img/c1-10}
-    \caption{Valores de las palabras en memoria correspondientes al vector de \mintinline{gas}{.byte}, tras indicar que los datos se almacenen desde la posición \texttt{0x10010002}}
+    \caption{Valores de las palabras en memoria correspondientes al vector de \mintinline{mips}{.byte}, tras indicar que los datos se almacenen desde la posición \texttt{0x10010002}}
     \label{fig:bytes-shift-endian}
 \end{figure}
 
-Teniendo esto en cuenta, vemos que los valores del vector de \mintinline{gas}{.byte} fueron almacenados en orden creciente respecto a posiciones de memoria que también crecen. Así, como en el programa indicamos los números \texttt{0x10}, \texttt{0x20}, \texttt{0x30} y \texttt{0x40} (en este orden), el primero de todos, el \texttt{0x10}, se encuentra en la posición de memoria \texttt{0x10010000}, luego el \texttt{0x20} en la posición \texttt{0x10010001}, y así sucesivamente.
+Teniendo esto en cuenta, vemos que los valores del vector de \mintinline{mips}{.byte} fueron almacenados en orden creciente respecto a posiciones de memoria que también crecen. Así, como en el programa indicamos los números \texttt{0x10}, \texttt{0x20}, \texttt{0x30} y \texttt{0x40} (en este orden), el primero de todos, el \texttt{0x10}, se encuentra en la posición de memoria \texttt{0x10010000}, luego el \texttt{0x20} en la posición \texttt{0x10010001}, y así sucesivamente.
 
 Por ende, leemos el vector completo como el valor de una palabra \texttt{0x40302010} (siendo 4 elementos, exactamente la misma cantidad como hay de bytes en una palabra, siendo una sola suficiente para representar la totalidad de dicho vector). Mientras, guardar el valor \texttt{0x10203040} nos da una la pauta de cómo se hubieran almacenado los valores del vector en cuestión si el ensamblador hubiera tenido un comportamiento que se acercara a \textit{Big-Endian} (en el cual los ``últimos números'' se guardarían en las posiciones de memoria más pequeñas/bajas).
 
@@ -187,5 +195,216 @@ Por lo tanto, las etiquetas \texttt{palabra1} y \texttt{palabra2} toman los valo
 \begin{center}
 \large\textbf{-- \textsl{Declaración de cadenas de caracteres} --}
 \end{center}
+
+\subsection*{1.12}
+
+Para localizar la cadena ingresada en el programa dentro de la memoria, sabemos que debería de comenzar en la posición \texttt{0x10010000} ya que, como venimos repitiendo, es la dirección por defecto donde comienzan los datos si no se le provee un argumento a la directiva \mintinline{mips}{.data}.
+
+Observando la valor de la palabra en la dirección mencionada, nos encontramos con el valor \textbf{\texttt{0x64636261}}. El patrón que tiene este valor es familiar con el explorado en la sección interior, en el cual veíamos cómo múltiples bytes estaban almacenados dentro de una palabra. Con esto en cuenta, podemos pensar que ésta posiblemente contenga los bytes individuales \texttt{0x61}, \texttt{0x62}, \texttt{0x63} y \texttt{0x64}, leyendo de posiciones menores a mayores en memoria. Considerando que la forma en que estos valores crecen se asemeja mucho con cómo nuestra cadena contiene caracteres consecutivos y lexicográficamente crecientes, sumado a que el nombre de la directiva utilizada en el programa para almacenar la cadena recibe el nombre de \mintinline{mips}{.ascii}, es intuitivo pensar que los bytes antes identificados se correspondan con las letras de la cadena en cuestión.
+
+Comprobando nuestras sospechas, \texttt{0x61} equivale al número \texttt{97} en decimal, número correspondiente a la letra \texttt{\textquotesingle{}a\textquotesingle{}} en el código ASCII. Sucesivamente el resto de bytes equivalen en decimal entonces a los números \texttt{98}, \texttt{99} y \texttt{100}, correspondientes a las letras \texttt{\textquotesingle{}b\textquotesingle{}}, \texttt{\textquotesingle{}c\textquotesingle{}} y \texttt{\textquotesingle{}d\textquotesingle{}} en ASCII.
+
+\begin{figure}[h]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.4\linewidth]{img/c1-12}
+    \caption{Valores en memoria tras el ensamblado del código indicado}
+    \label{fig:ascii-mem}
+\end{figure}
+
+De todas formas, debemos recordar que nuestra cadena era \texttt{\char34{}abcde\char34}, por lo que nos estaría faltando ubicar la letra \texttt{\textquotesingle{}e\textquotesingle{}}. Como podemos ver en la Figura \ref{fig:ascii-mem}, la próxima palabra en la posición \texttt{0x10010004} contiene el valor \textbf{\texttt{0x0000ff65}}. El \textsl{\texttt{65}} en las posiciones menos significativas del valor surge como continuación de la cadena de caracteres, el cual se encuentra en la posición de memoria siguiente al \textsl{\texttt{64}} de la palabra anterior, pero que se nos muestra de esta forma al tener que ubicarse por fuera del espacio de la primera palabra (en simples palabras, ``no entraba'' en la primera palabra), y por lo ya discutido en la sección anterior.
+
+Luego, el \textsl{\texttt{ff}} que le sigue al \textsl{\texttt{65}} se corresponde con el valor almacenado con la directiva \mintinline{mips}{.byte} dentro del programa.
+
+\subsection*{1.13}
+
+Si empleamos la directiva \mintinline{mips}{.asciiz} en vez de la directiva \mintinline{mips}{.ascii} en el programa de la Cuestión anterior, el cambio que se observa es el agregado de lo que sería el equivalente a un byte \textit{vacío} entre el final de la cadena, y el próximo valor almacenado con la directiva \mintinline{mips}{.byte}. Es decir, mientras la primera palabra no cambia, la segunda en memoria toma ahora el valor \textbf{\texttt{0x00ff0065}}.
+
+Este compartamiento es similar a la forma en la que, en lenguajes de programación como \texttt{C}, se agrega un caracter con valor ASCII = 0 al final de una cadena, conocido como el \textit{terminador} (generalmente representado como {\usemintedstyle{default}\mintinline{mips}{'\0'}}). Haciendo uso de este caracter, se puede determinar en qué punto finaliza una cadena de caracteres, incluso conociendo sólo el comienzo de la misma y que sus elementos se encuentran en posiciones de memroia consecutivas. Por lo tanto, al operar con ella, es sólo cuestión de recorrer todas estas posiciones partiendo desde la primera, hasta encontrarse con un byte \texttt{0x00} que indica el final.
+
+\subsection*{1.14}
+
+Podemos reemplazar la directiva \mintinline{mips}{.ascii} con la \mintinline{mips}{.byte} cargando posiciones en memoria con un vector de los caracteres de la cadena original, representados con su valor ASCII:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c1-14.asm}
+\vspace{7pt}
+
+De hecho, podemos incluso utilizar los caracteres como tales, en vez de sus equivalentes en ASCII, y el ensamblador se encargará de transformarlos en sus valores numéricos correspondientes:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c1-14b.asm}
+\vspace{7pt}
+
+\begin{center}
+\large\textbf{-- \textsl{Reserva de espacio en memoria} --}
+\end{center}
+
+\subsection*{1.15 y 1.16}
+
+Observando el panel de datos con los valores en la memoria (Fig. \ref{fig:space-mem}), podemos ver que se ha reservado el tamaño equivalente a exactamente dos palabras, para la variable \texttt{espacio}. Esto equivale a 8 bytes, entendiéndose así que el parámetro de la directiva \mintinline{mips}{.space} está expresado en cantidad de bytes que se quiere reservar en memoria.
+
+Dicho esto, entonces el rango de posiciones que se han reservado en la memoria para la variable es [\texttt{\textbf{0x10010004}}, \texttt{\textbf{0x1001000b}}]. Las palabras en posiciones \texttt{0x10010000} y \texttt{0x1001000c} contienen los valores \texttt{0x20} y \texttt{0x30} respectivamente, declarados con la directiva \mintinline{mips}{.word} en el programa.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.6\linewidth]{img/c1-15}
+    \caption{Valores en memoria tras ensamblar el programa dado}
+    \label{fig:space-mem}
+\end{figure}
+
+\begin{center}
+\large\textbf{-- \textsl{Alineación de datos en memoria} --}
+\end{center}
+
+\subsection*{1.17}
+
+Se reservó el rango de posiciones [\texttt{\textbf{0x10010001}}, \texttt{\textbf{0x10010004}}] en memoria para la variable \texttt{espacio}.
+
+\subsection*{1.18}
+\label{sec:c1-18}
+
+Si bien los cuatro bytes reservados podrían contener la información de una palabra, éstos no podrían funcionar como tal ya que, como dijimos en la \hyperref[sec:c1-6]{Cuestión 1.6}, la memoria de una palabra tiene que \textit{estar alineada}, en el sentido que cada una debe comenzar en una posición de memoria múltiplo de 4.
+
+Desde lo visto en la teoría, la arquitectura de MIPS nos permite leer información de la memoria de a una palabra a la vez, pues su tamaño equivale al ancho del bus de datos, y esto necesariamente debe ser en posiciones iniciales múltiplos de 4. Por tal motivo, si quisiérmos usar los 4 bytes reservados para \texttt{espacio} como un único espacio de memoria del tamaño de una palabra, realmente deberíamos acceder para cada operación necesaria a las palabras en las direcciones \texttt{0x10010000} y \texttt{0x10010004}, que lo hace poco práctico e ineficiente para este propósito. Esto sin mencionar las operaciones adicionales que se requerirían para juntar ambas palabras, o también descartar información en otras posiciones que se encuentren en las palabras, pero que no corresponda al espacio asignado para la tarea.
+
+\subsection*{1.19}
+
+El \texttt{byte1}, al haberse declarado al comienzo del programa, fue inicializado en la posición de memoria \textbf{\texttt{0x10010000}}. Mientras, como el \texttt{byte2} fue declarado al final del programa, éste fue posicionado en la dirección de memoria \textbf{\texttt{0x10010005}}, después del espacio reservado para la variable \texttt{espacio}.
+
+\subsection*{1.20}
+
+Finalmente, la variable \texttt{palabra} fue inicializada partiendo de la posición \texttt{\textbf{0x10010008}} en la memoria. Esto se debe a que como la variable fue declarada con la directiva \mintinline{mips}{.word}, ésta debe de ocupar una palabra entera, a pesar de que la memoria esté ocupada hasta la posición \texttt{0x10010005}. En consecuencia, la variable se ubica en la posición ya mencionada, teniendo en cuenta que la anterior palabra en la posición \texttt{0x10010004} tiene un byte ocupado por la variable \texttt{byte2}.
+
+Esta situación es similar a la vista en la \hyperref[sec:c1-6]{Cuestión 1.6}, en el cual la declaración de una variable con \mintinline{mips}{.word} fue dada a partir del comienzo de la \textit{palabra} más próxima libre, en vez de comenzar desde la primera \textit{posición} libre.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.5\linewidth]{img/c1-17}
+    \caption{Vista de la memoria posterior al emsamblado del código de las Cuestiones 1.17-1.20}
+\end{figure}
+
+\subsection*{1.21 y 1.22}
+
+De haber entendido correctamente el rol de la directiva \mintinline{mips}{.align}, ésta hará que la próxima directiva de declaración de algún dato se coloque partiendo desde la próxima potencia de $2^n$, siendo n el argumento que recibe la directiva. En este caso, como la directiva recibe al número \textit{2} como argumento, la variable \texttt{espacio} se reservará partiendo desde la primera posición múltiplo de $2^2 = 4$ libre más cercana. Considerando que la primera posición de memoria libre a este punto es la \texttt{0x10010001} (ya que \texttt{byte1} ocupa la anterior), la próxima posición múltiplo de 4 disponible es la \texttt{0x10010004}. Podemos confirmar nuestra sospecha al ver el valor de la posición de memoria a la que hace referencia \texttt{espacio} en la ventana Labels (Fig. \ref{fig:c1-21-labels}).
+
+\begin{figure}[h]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.25\linewidth]{img/c1-21}
+    \caption{Valores en memoria de las etiquetas para el código de las Cuestiones 1.21-1.22}
+    \label{fig:c1-21-labels}
+\end{figure}
+
+Luego, como la directiva \mintinline{mips}{.space} recibe un \textit{4} como argumento, se reservan 4 posiciones desde la inicial, efectivamente inicializándose en el rango [\texttt{\textbf{0x10010004}}, \texttt{\textbf{0x10010007}}].
+
+El hecho de reservar 4 posiciones de memoria (4 bytes), como también haber alineado la variable con una posición múltiplo de 4, hacen que el espacio reservado pueda constituir una palabra. No sólo el tamaño es igual al de una palabra (como ya vimos en la pregunta de la \hyperref[sec:c1-18]{Cuestión 1.18}), sino que también está alineada apropiadamente con el comienzo de una palabra. Al fin y al cabo, justamente es la directiva \mintinline{mips}{.align} la cual se encargó de hacerlo, ya que al indicarle el \textit{2} como argumento, alineó el espacio con una posición múltiplo de $2^2 = 4$, como es apropiado para una palabra (según lo discutido en la Cuestión mencionada).
+
+Con todo esto en cuenta, podemos decir resumidamente que:
+
+\begin{center}
+    \textit{La directiva \mintinline{mips}{.align} ubica en memoria el próximo dato declarado a partir de la primera posición libre que sea múltiplo de $2^n$, siendo \textbf{n} el argumento pasado a la directiva.}
+\end{center}
+
+\section{Apartado 2}
+
+
+
+\chapter{Problemas}
+
+
+\begin{center}
+    \Large\textbf{-- Apartado 1 --}
+\end{center}
+
+\section{}
+
+\usemintedstyle{autumn}
+\inputminted{mips}{src/problemas/1.asm}
+\usemintedstyle{default}
+
+En \textcolor{autumn-red-pyg}{\textbf{rojo}} se indican las etiquetas, en \textcolor{autumn-blue-pyg}{\textbf{azul}} las directivas, en \textcolor{autumn-gray-pyg}{\textbf{gris}} los comentarios, y en \textcolor{autumn-teal-pyg}{\textbf{verde azulado}} las instrucciones.
+
+\section{}
+
+\inputminted{mips}{src/problemas/2.asm}
+
+Utilizo dos directivas \mintinline{mips}{.space} pasándoles el número \textit{80} como argumento pues si una palabra son 4 bytes, y cada vector tiene que tener 20 palabras: $20 \cdot 4\;\text{bytes} = 80\;\text{bytes}$.
+
+\section{}
+
+\inputminted{mips}{src/problemas/3.asm}
+
+
+\section{}
+
+\inputminted{mips}{src/problemas/4.asm}
+
+
+\section{}
+
+\inputminted[breaklines, breakbytokenanywhere]{mips}{src/problemas/5.asm}
+
+
+\section{}
+
+\inputminted{mips}{src/problemas/6.asm}
+
+En ambos casos uso vectors de bytes, ya que los números de la matriz son lo suficientemente pequeños para ser almacenados de esta manera.
+
+Al guardar la matriz por filas, termina resultando en un orden creciente, ya que entendemos que al ``almacenar por filas''. vamos guardando las filas de arriba hacia abajo, y los valores de cada una se almacenarán de forma consecutiva, como se leen de izquierda a derecha.
+
+Mientras, al guardar la matriz por columnas, entendemos que almacenamos las columnas de izquierda a derecha, y que los valores de cada una de ellas se almacenarán de forma consecutiva, como se leen de arriba abajo.
+
+\begin{figure}[h]
+    \centering
+    \captionsetup{justification = centering}
+    \subfloat[Almacenar por filas]{
+        \begin{tabular}{!{\vrule width 1.5pt}c|c|c!{\vrule width 1.5pt}}
+            \noalign{\hrule height 1.5pt}
+            \rowcolor{LimeGreen!50}
+            1 & 2 & 3 \\
+            \noalign{\hrule height 1.5pt}
+            \rowcolor{Violet!50}
+            4 & 5 & 6 \\
+            \noalign{\hrule height 1.5pt}
+            \rowcolor{RoyalBlue!50}
+            7 & 8 & 9 \\
+            \noalign{\hrule height 1.5pt}
+        \end{tabular}
+
+        $\rightarrow$
+
+        \begin{tabular}{!{\vrule width 1.5pt}>{\columncolor{LimeGreen!50}}c|>{\columncolor{LimeGreen!50}}c|>{\columncolor{LimeGreen!50}}c!{\vrule width 1.5pt}>{\columncolor{Violet!50}}c|>{\columncolor{Violet!50}}c|>{\columncolor{Violet!50}}c!{\vrule width 1.5pt}>{\columncolor{RoyalBlue!50}}c|>{\columncolor{RoyalBlue!50}}c|>{\columncolor{RoyalBlue!50}}c!{\vrule width 1.5pt}}
+            \noalign{\hrule height 1.5pt}
+            1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+            \noalign{\hrule height 1.5pt}
+        \end{tabular}
+    }
+
+
+    \subfloat[Almacenar por columnas]{
+        \begin{tabular}{!{\vrule width 1.5pt}>{\columncolor{LimeGreen!50}}c!{\vrule width 1.5pt}>{\columncolor{Violet!50}}c!{\vrule width 1.5pt}>{\columncolor{RoyalBlue!50}}c!{\vrule width 1.5pt}}
+            \noalign{\hrule height 1.5pt}
+            1 & 2 & 3 \\
+            \hline
+            4 & 5 & 6 \\
+            \hline
+            7 & 8 & 9 \\
+            \noalign{\hrule height 1.5pt}
+        \end{tabular}
+
+        $\rightarrow$
+
+        \begin{tabular}{!{\vrule width 1.5pt}>{\columncolor{LimeGreen!50}}c|>{\columncolor{LimeGreen!50}}c|>{\columncolor{LimeGreen!50}}c!{\vrule width 1.5pt}>{\columncolor{Violet!50}}c|>{\columncolor{Violet!50}}c|>{\columncolor{Violet!50}}c!{\vrule width 1.5pt}>{\columncolor{RoyalBlue!50}}c|>{\columncolor{RoyalBlue!50}}c|>{\columncolor{RoyalBlue!50}}c!{\vrule width 1.5pt}}
+            \noalign{\hrule height 1.5pt}
+            1 & 4 & 7 & 2 & 5 & 8 & 3 & 6 & 9 \\
+            \noalign{\hrule height 1.5pt}
+        \end{tabular}
+    }
+    \caption{Visualización de las dos formas de almacenar la matriz $A$ del ejercicio}
+\end{figure}
 
 \end{document}
