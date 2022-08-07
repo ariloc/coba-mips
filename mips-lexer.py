@@ -49,8 +49,8 @@ class MIPSLexer(RegexLexer):
             (r'(\.\d+|[0-9]+\.[0-9]*)([eE][-+]?[0-9]+)?', Number.Float),
             (r'0[bB][01]+', Number.Bin),
             (r'0[oO][0-7]+', Number.Oct),
-        (r'0[xX][0-9a-fA-F]+', Number.Hex),
-        (r'[0-9]+', Number.Integer),
+            (r'0[xX][0-9a-fA-F]+', Number.Hex),
+            (r'[0-9]+', Number.Integer),
             (r'\.\.\.|=>', Punctuation),
             (r'\+\+|--|~|&&|\?|:|\|\||\\(?=\n)|'
              r'(<<|>>>?|==?|!=?|[-<>+*%&|^/])=?', Operator),
