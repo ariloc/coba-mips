@@ -2,3 +2,7 @@
 - Página 3, hay un espacio adicional después de "Carga en el simulador el código provisto" (quedando el punto final en la próxima línea). Además, podría ser mejor resaltado para demarcar que los ejercicios siguientes se relacionan a cargar el código en cuestión al simulador.
 - Página 4: "La directiva .byte valor inicializa una posición de memoria, de tamaño byte..." No debería ser algo como "del tamaño de un byte"?
 - Página 4: Falta de explicación de little y big endian (aunque puede ser a propósito para investigar)
+- Página 8: Se indica que la etiqueta main hace referencia por defecto a la dirección 0x00400020. Sin embargo, en el ejemplo dado apunta a la 0x00400000, lo cual puede prestar a confusión o dificultad para entender por qué esta dirección sería diferente a la de comienzo de .text.
+- Página 8: Se habla del concepto de "parte alta" y "parte baja" de un registro, y la explicación de la misma es un poco confusa. Podría incluirse una figura que muestre las dos partes. Además, el concepto de "peso" o "bits significativos" no ha sido introducido de forma apropiada en el enunciado.
+- Página 8, Cuestión 2.1: "Localiza la instrucción en memoria de instrucciones..." suena raro, buscar un sinónimo para "instrucción".
+- Página 8, Cuestión 2.1: "Localiza la instrucción en memoria de instrucciones..." suena raro, buscar un sinónimo para "instrucción".

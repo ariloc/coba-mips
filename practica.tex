@@ -19,6 +19,8 @@
 \usepackage{xpatch}
 \usepackage{subfig}
 \usepackage{colortbl}
+\usepackage{tikz}
+\usetikzlibrary{calc,tikzmark}
 
 % mips-lexer.py HAS TO HAVE execution permissions for this to work
 % minted uses which to detect the file:
@@ -310,7 +312,18 @@ Con todo esto en cuenta, podemos decir resumidamente que:
 
 \section{Apartado 2}
 
+\subsection*{2.1}
 
+La dirección de memoria donde se encuentra la instrucción en cuestión es la \texttt{\textbf{0x00400000}}, y ocupa el tamaño de exactamente una palabra (4 bytes, 32 bits). El valor que la representa es \texttt{0x3c108690}. Como sabemos lo que repreenta en código Assembly, podemos deducir las partes que lo componen:
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \texttt{\textbf{0\tikzmark{hex-lui-pref}x \textcolor{RedViolet}{3\tikzmark{hex-lui-inst}c} \textcolor{Red}{1\tikzmark{hex-lui-reg}0} \textcolor{Emerald}{86\tikzmark{hex-lui-ivalue}90}}}
+    \begin{tikzpicture}[overlay, remember picture]
+        \draw ($ (pic cs:hex-lui-pref) + (0,-.1) $) -- ($ (pic cs:hex-lui-pref) + (0,-.4) $) -| ($ (pic cs:hex-lui-pref) + (-3,-.6) $) node (pref) [label={[yshift=5pt]-90:\small{}prefijo hexadecimal}] {};
+    \end{tikzpicture}
+\end{figure}
 
 \chapter{Problemas}
 
@@ -325,7 +338,7 @@ Con todo esto en cuenta, podemos decir resumidamente que:
 \inputminted{mips}{src/problemas/1.asm}
 \usemintedstyle{default}
 
-En \textcolor{autumn-red-pyg}{\textbf{rojo}} se indican las etiquetas, en \textcolor{autumn-blue-pyg}{\textbf{azul}} las directivas, en \textcolor{autumn-gray-pyg}{\textbf{gris}} los comentarios, y en \textcolor{autumn-teal-pyg}{\textbf{verde azulado}} las instrucciones.
+En \textcolor{autumn-red-pyg}{\textbf{rojo}} se indican las etiquetas, en \textcolor{autumn-blue-pyg}{\textbf{azul}} las directivas, en \textcolor{autumn-gray-pyg}{\textbf{gris}} los comentarios, y en \textcolor{autumn-teal-pyg}{\textbf{celeste}} las instrucciones.
 
 \section{}
 
