@@ -23,6 +23,7 @@ def main(args):
     _cmdline.main(args)
 
 # Pygments Lexer based off: https://github.com/sunjerry019/20SS-RA-uebungen/blob/06dc004bbb7fca0fb5a44d9eb710dd73f3f70146/hausarbeit/ha05/mipslexer.py
+# Source for Name.Variable.Instance (with minor modifications): https://github.com/Xodarap/Mips-Assembly-Syntax-Highlighting/blob/master/mal.lang
 class MIPSLexer(RegexLexer):
     
     """
@@ -46,6 +47,9 @@ class MIPSLexer(RegexLexer):
         'root': [
             include('commentsandwhitespace'),
             (r'(\.[a-z]+)\b', Keyword),
+            (r'(\$(3[01]|[12]\d|\d|(ra)|([vk][01])|(a[0-3t])|(t[0-9])|(s[0-7p])|([gsf]p)|(zero)|(f3[01]|f[12]\d|f\d)))\b', Name.Variable.Instance),
+            (r'[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable),
+            #(r'\$[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable.Instance),
             (r'(\.\d+|[0-9]+\.[0-9]*)([eE][-+]?[0-9]+)?', Number.Float),
             (r'0[bB][01]+', Number.Bin),
             (r'0[oO][0-7]+', Number.Oct),
@@ -58,11 +62,9 @@ class MIPSLexer(RegexLexer):
             (r'[})\].]', Punctuation),
             # (r'(for|in|while|do|return|if|else)\b', Keyword, 'slashstartsregex'),
             # (r'(var|macro|function)\b', Keyword.Declaration, 'slashstartsregex'),
-            (r'[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable),
-            (r'\$[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable.Instance),
             (r'(add|sub|addu|subu|addi|addiu|div|rem|mul|b|j|jal|jr|beq|beqz|bne|bnez|bge|bgeu|'
                 r'begz|bgt|bgtu|bgtz|ble|bleu|blez|blt|bltu|bltz|sltu|not|and|or|syscall|move|'
-                r'la|lb|lw|li|sw|sh|sb)\b', Name.Builtin),
+                r'la|lb|lw|li|lui|sw|sh|sb)\b', Name.Builtin),
             (r'(\'.\')', String.Char),
             (r'"(\\\\|\\"|[^"])*"', String.Double),
             (r"'(\\\\|\\'|[^'])*'", String.Single),

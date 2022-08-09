@@ -20,7 +20,7 @@
 \usepackage{subfig}
 \usepackage{colortbl}
 \usepackage{tikz}
-\usetikzlibrary{calc,tikzmark}
+\usetikzlibrary{calc,tikzmark,arrows}
 
 % mips-lexer.py HAS TO HAVE execution permissions for this to work
 % minted uses which to detect the file:
@@ -314,16 +314,43 @@ Con todo esto en cuenta, podemos decir resumidamente que:
 
 \subsection*{2.1}
 
-La dirección de memoria donde se encuentra la instrucción en cuestión es la \texttt{\textbf{0x00400000}}, y ocupa el tamaño de exactamente una palabra (4 bytes, 32 bits). El valor que la representa es \texttt{0x3c108690}. Como sabemos lo que repreenta en código Assembly, podemos deducir las partes que lo componen:
+La dirección de memoria donde se encuentra la instrucción en cuestión es la \texttt{\textbf{0x00400000}}, y ocupa el tamaño de exactamente una palabra (4 bytes = 32 bits). El valor que la representa es \texttt{0x3c108690}. Como sabemos que es una traducción de código en Assembly que conocemos, podemos deducir las partes que lo componen. Sin embargo, si bien algunas de ellas pueden ser reconocidas desde su representación en hexadecimal, deberemos de remitirnos a su equivalente en binario para darle completo sentido a cómo es que realmente funciona.
+
 
 \begin{figure}[H]
     \centering
     \captionsetup{justification = centering}
-    \texttt{\textbf{0\tikzmark{hex-lui-pref}x \textcolor{RedViolet}{3\tikzmark{hex-lui-inst}c} \textcolor{Red}{1\tikzmark{hex-lui-reg}0} \textcolor{Emerald}{86\tikzmark{hex-lui-ivalue}90}}}
+    \texttt{\textbf{0\tikzmark{hex-lui-pref}x \textcolor{Red}{3c\tikzmark{hex-lui-tobin}10} \textcolor{Emerald}{86\tikzmark{hex-lui-ivalue}90}}}
     \begin{tikzpicture}[overlay, remember picture]
-        \draw ($ (pic cs:hex-lui-pref) + (0,-.1) $) -- ($ (pic cs:hex-lui-pref) + (0,-.4) $) -| ($ (pic cs:hex-lui-pref) + (-3,-.6) $) node (pref) [label={[yshift=5pt]-90:\small{}prefijo hexadecimal}] {};
+        \draw ($ (pic cs:hex-lui-pref) + (0,-.1) $) -- ($ (pic cs:hex-lui-pref) + (0,-.4) $) -| ($ (pic cs:hex-lui-pref) + (-3,-.6) $) node (pref) [label={[yshift=5pt]-90:\small{}\sffamily{}prefijo hexadecimal}] {};
+        \draw ($ (pic cs:hex-lui-ivalue) + (0,-.1) $) -- ($ (pic cs:hex-lui-ivalue) + (0,-.4) $) -| ($ (pic cs:hex-lui-ivalue) + (3,-.6) $) node (ivalue) [label={[yshift=5pt]-90:\small{}\textcolor{Emerald}{\sffamily{}dato inmediato}}] {};
+
+        \draw[-stealth] ($ (pic cs:hex-lui-tobin) + (0,-.1) $) -- ($ (pic cs:hex-lui-tobin) + (0,-.5) $) node (hex-tobin) [label={[yshift=2pt]-90:\textbf{\texttt{\textcolor{NavyBlue}{001\tikzmark{hex-lui-opcode}111}00\;000\textcolor{Purple}{10\tikzmark{hex-lui-reg}000}}}}] {};
+        \draw ($ (hex-tobin) + (-.95,-.5) $) -- ($ (hex-tobin) + (-.95,-.7) $) -| ($ (hex-tobin) + (-2,-.9) $) node [label={[yshift=5pt]-90:\small\sffamily{}\textcolor{NavyBlue}{código de instrucción}}] {};
+        \draw ($ (hex-tobin) + (1.075,-.5) $) -- ($ (hex-tobin) + (1.075,-.7) $) -| ($ (hex-tobin) + (2,-.9) $) node [label={[yshift=5pt]-90:\small\sffamily{}\textcolor{Purple}{número de registro}}] {};
     \end{tikzpicture}
+    \vspace{50pt}
+    \caption{Formato del valor contenido en memoria para la instrucción ingresada}
+    \label{fig:lui-mem-hex}
 \end{figure}
+
+En la Figura \ref{fig:lui-mem-hex} vemos las 4 partes del valor en memoria para la instrucción:
+
+\begin{itemize}
+    \item El \textbf{prefijo hexadecimal}, el cual ya bien sabemos nos indica que un valor dado está representado en una notación numérica con base 16.
+    \item El \textbf{código de instrucción} (conocido como \textit{opcode}), es decir, un valor que nos indica qué tipo de instrucción se está indicando a ejecutarse. En el código tratado, se corresponde con informar que se quiere llevar a cabo la instrucción \mintinline{mips}{lui}.
+
+        El motivo por el cual para poder separar este campo debemos convertir en binario los primeros dos bytes de la palabra, es que el código de instrucción ocupa los primeros \textit{6} bits de la palabra. Por lo tanto, al pasarse a base 16, no es claramente distinguible. Por la misma razón así sucede con los siguientes dos grupos de 5 bits (el primero de ellos ignorado para la instrucción \mintinline{mips}{lui}).
+    \item El \textbf{número de registro}, que contiene el identificador del registro al cual el dato inmediato será cargado. Si bien en código Assembly éste es representado con un nombre \mintinline{mips}{$s0}, internamente los registros son enumerados del 0 al 31, haciendo que esta abstracción sea interpretada por el ensamblador al cargarse la instrucción en memoria. De hecho, en el programa dado se puede reemplazar \mintinline{mips}{$s0} por \mintinline{mips}{$16} sin repercusiones.
+    \item El \textbf{dato inmediato}, el cual como ya vimos en la teoría, es un valor del tamaño de media palabra (2 bytes = 16 bits), el cual será cargado en los 16 bits más significativos del registro especificado. Debido a su tamaño en bits múltiplo de 4, sumado a que se lo representa en el código en hexadecimal dentro del código en cuestión, lo hace fácil de distinguir en la representación en hexa del valor en memoria.
+\end{itemize}
+
+\subsection*{2.2}
+
+Efectivamente, al correr el programa, los primeros 2 bytes del registro son cargados con el valor \texttt{0x8690}, así quedando la palabra almacenada en el registro como \textbf{\texttt{0x86900000}}.
+
+\subsection*{2.3}
+% TODO
 
 \chapter{Problemas}
 
