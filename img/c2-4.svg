@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="80mm"
+   height="9mm"
+   viewBox="0 0 80 9"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="c2-4.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="12.414927"
+     inkscape:cx="183.93181"
+     inkscape:cy="56.665657"
+     inkscape:window-width="1880"
+     inkscape:window-height="1022"
+     inkscape:window-x="20"
+     inkscape:window-y="38"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6-5" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6-5-5" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6-5-2" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6-0" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-6-5-5-3" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-2" />
+    <rect
+       x="24.038317"
+       y="28.360241"
+       width="169.08446"
+       height="46.1367"
+       id="rect113-1" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,39.540252,-0.58642973)"
+       id="text111-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-2);fill:#000000"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3096"><tspan
+           style="fill:#808080"
+           id="tspan3094">0x5678</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,16.019868,-6.0203464)"
+       id="text111-7"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6);fill:#000000"><tspan
+         x="24.039062"
+         y="38.976562"
+         id="tspan3098">0x12340000</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,52.666994,-6.0203462)"
+       id="text111-7-9"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6-0);fill:#000000"><tspan
+         x="24.039062"
+         y="38.976562"
+         id="tspan3100">0x12345678</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,23.579376,-1.207126)"
+       id="text111-7-3"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6-5);fill:#000000"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3104"><tspan
+           style="fill:#19177d"
+           id="tspan3102">$at</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,5.4752572,-7.2388345)"
+       id="text111-7-3-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6-5-5);fill:#000000"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3108"><tspan
+           style="fill:#008000"
+           id="tspan3106">lui</tspan></tspan></text>
+    <rect
+       style="fill:#000000;stroke-width:0.205011"
+       id="rect513"
+       width="9.0812664"
+       height="0.31559908"
+       x="9.2266254"
+       y="3.0878162" />
+    <path
+       sodipodi:type="star"
+       style="fill:#000000;stroke-width:0.264583"
+       id="path567"
+       inkscape:flatsided="false"
+       sodipodi:sides="3"
+       sodipodi:cx="36.587646"
+       sodipodi:cy="7.799428"
+       sodipodi:r1="1.4242059"
+       sodipodi:r2="0.71210295"
+       sodipodi:arg1="0.57432035"
+       sodipodi:arg2="1.6215179"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="M 37.783355,8.5731482 36.551543,8.5106151 35.319731,8.448082 35.989792,7.4125679 36.659853,6.3770537 37.221604,7.475101 Z"
+       inkscape:transform-center-x="-0.47414284"
+       inkscape:transform-center-y="0.33024706"
+       transform="rotate(-32.528838,19.742871,36.539525)" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,41.293649,-7.2388345)"
+       id="text111-7-3-6-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6-5-5-3);fill:#000000"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3112"><tspan
+           style="fill:#008000"
+           id="tspan3110">ori</tspan></tspan></text>
+    <rect
+       style="fill:#000000;stroke-width:0.216544"
+       id="rect513-0"
+       width="10.131737"
+       height="0.31559908"
+       x="44.497559"
+       y="2.9786539" />
+    <rect
+       style="fill:#000000;stroke-width:0.161675"
+       id="rect513-0-0"
+       width="5.6478915"
+       height="0.31559908"
+       x="-40.871414"
+       y="-33.760754"
+       transform="rotate(143.93976)" />
+    <path
+       sodipodi:type="star"
+       style="fill:#000000;stroke-width:0.264583"
+       id="path567-6"
+       inkscape:flatsided="false"
+       sodipodi:sides="3"
+       sodipodi:cx="36.587646"
+       sodipodi:cy="7.799428"
+       sodipodi:r1="1.4242059"
+       sodipodi:r2="0.71210295"
+       sodipodi:arg1="0.57432035"
+       sodipodi:arg2="1.6215179"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="M 37.783355,8.5731482 36.551543,8.5106151 35.319731,8.448082 35.989792,7.4125679 36.659853,6.3770537 37.221604,7.475101 Z"
+       inkscape:transform-center-x="-0.47414284"
+       inkscape:transform-center-y="0.33024706"
+       transform="rotate(-32.528838,37.716496,-25.763292)" />
+    <path
+       id="path569"
+       style="fill:#000000;stroke-width:0.123412"
+       d="m 21.913292,5.4824305 v 0.477968 h 19.864493 v -0.477968 z" />
+    <rect
+       style="fill:#000000;stroke-width:0.208047"
+       id="rect574"
+       width="0.42218262"
+       height="1.5703237"
+       x="21.913366"
+       y="4.3900757" />
+    <rect
+       style="fill:#000000;stroke-width:0.208047"
+       id="rect574-3"
+       width="0.42218262"
+       height="1.5703237"
+       x="41.566692"
+       y="4.3900757" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,60.205132,-1.1381922)"
+       id="text111-7-3-9"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-6-5-2);fill:#119177;fill-opacity:0.866667"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3116"><tspan
+           style="fill:#19177d"
+           id="tspan3114">$s0</tspan></tspan></text>
+    <path
+       id="path569-1"
+       style="fill:#000000;stroke-width:0.123412"
+       d="m 58.574187,5.5513635 v 0.477968 H 78.43868 v -0.477968 z" />
+    <rect
+       style="fill:#000000;stroke-width:0.208047"
+       id="rect574-2"
+       width="0.42218262"
+       height="1.5703237"
+       x="58.574257"
+       y="4.4590073" />
+    <rect
+       style="fill:#000000;stroke-width:0.208047"
+       id="rect574-3-7"
+       width="0.42218262"
+       height="1.5703237"
+       x="78.227585"
+       y="4.4590073" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-6.4218949,-5.3600602)"
+       id="text111-8"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Hack;-inkscape-font-specification:Hack;white-space:pre;shape-inside:url(#rect113-1);display:inline;fill:#808080"><tspan
+         x="24.039062"
+         y="35.4375"
+         id="tspan3118">0x1234</tspan></text>
+  </g>
+</svg>

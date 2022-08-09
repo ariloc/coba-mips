@@ -21,6 +21,7 @@
 \usepackage{colortbl}
 \usepackage{tikz}
 \usetikzlibrary{calc,tikzmark,arrows}
+\usepackage{svg}
 
 % mips-lexer.py HAS TO HAVE execution permissions for this to work
 % minted uses which to detect the file:
@@ -312,6 +313,10 @@ Con todo esto en cuenta, podemos decir resumidamente que:
 
 \section{Apartado 2}
 
+\begin{center}
+\large\textbf{-- \textsl{Carga de datos inmediatos (constantes)} --}
+\end{center}
+
 \subsection*{2.1}
 
 La dirección de memoria donde se encuentra la instrucción en cuestión es la \texttt{\textbf{0x00400000}}, y ocupa el tamaño de exactamente una palabra (4 bytes = 32 bits). El valor que la representa es \texttt{0x3c108690}. Como sabemos que es una traducción de código en Assembly que conocemos, podemos deducir las partes que lo componen. Sin embargo, si bien algunas de ellas pueden ser reconocidas desde su representación en hexadecimal, deberemos de remitirnos a su equivalente en binario para darle completo sentido a cómo es que realmente funciona.
@@ -349,8 +354,37 @@ En la Figura \ref{fig:lui-mem-hex} vemos las 4 partes del valor en memoria para 
 
 Efectivamente, al correr el programa, los primeros 2 bytes del registro son cargados con el valor \texttt{0x8690}, así quedando la palabra almacenada en el registro como \textbf{\texttt{0x86900000}}.
 
-\subsection*{2.3}
-% TODO
+\subsection*{2.3 y 2.4}
+De forma similar a la Cuestión anterior, el dato inmediato especificado como argumento a la instrucción \mintinline{mips}{li} es cargado en el registro indicado como argumento. La diferencia es que este valor es del tamaño de una palabra completa, en vez de media palabra como sucedía con la instrucción \mintinline{mips}{lui}.
+
+Ante esto, tras revisar la interpretación del código ensamblado en el panel de texto (\textit{Text Segment}), vemos que, siendo que \mintinline{mips}{li} es realmente una \textit{pseudoinstrucción}, fue descompuesta en dos instrucciones del procesador: la ya vista \mintinline{mips}{lui}, y otra llamada \mintinline{mips}{ori}.\\
+
+Conociendo ya el funcionamiento de \mintinline{mips}{lui} en base a lo visto en la Cuestión anterior, podemos entender que carga los primeros dos bytes (es decir, los más significativos) del valor inmediato utilizado en el código, al registro \mintinline{mips}{$at} (abreviación de \textit{Assembler Temporary}). Este registro está reservado por el ensamblador para las operaciones realizadas como \textit{pseudo comandos}, es decir, operaciones intermedias llevadas a cabo por las instrucciones reales que fueron obtenidas de la interpretación de una instrucción en el código Assembly.\footnote{\url{https://en.wikibooks.org/wiki/MIPS_Assembly/Register_File}} La interpretación de pseudoinstrucciones suele involucrar el uso del registro \mintinline{mips}{$at}, como es el caso en cuestión.
+
+
+Posteriormente, se hace uso de la instrucción \mintinline{mips}{ori}, también llamada \textit{OR Immediate}, el cual dado un registro de destino, un registro origen y un valor inmediato, almacena el resultado de la operación \texttt{OR} binaria entre los últimos dos, en el registro de destino. El valor inmediato dicho debe de tener un tamaño de, al igual que en \mintinline{mips}{lui}, media palabra. Por lo tanto, en este caso, al correr esta instrucción se procede a almacenar en el registro de destino, originalmente especificado en la pseudoinstrucción \mintinline{mips}{li}, el resultado de hacer el \texttt{OR} binario entre:
+
+\begin{itemize}
+    \itemsep0em
+    \item Los dos bytes menos significativos del valor que se quería cargar originalmente al registro en el programa.
+    \item Los otros dos bytes anteriormente almacenados en \mintinline{mips}{$at} con la instrucción real \mintinline{mips}{lui}.
+\end{itemize}
+
+Notar que, como la instrucción \mintinline{mips}{lui} establece los otros dos bytes menos significativos de \mintinline{mips}{$at} en 0, aplicar a continuación la operación \texttt{OR} no afectará al valor inmediato con el que se opera, resultando en lo que podría considerarse como ``la carga de un valor'' para estos dos bytes.
+
+\begin{figure}[h]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.6\linewidth]{img/c2-4.pdf}
+    \caption{\mintinline{mips}{li $s0, 0x12345678}, con las instrucciones reales que lo implementan}
+\end{figure}
+
+Pensando más a fondo, resulta claro el motivo de tener una pseudoinstrucción tal como \mintinline{mips}{li}. Y es que, con un tamaño de palabra de 32 bits, donde los registros pueden almacenar una palabra,  y las posiciones de memoria son accesibles por palabra, las instrucciones están limitadas a un máximo de 32 bits cada una. Como es estrictamente necesario que algunos de estos bits estén dedicados a indicar de qué instrucción se trata, es imposible disponer de los 32 bits que se quieran cargar sobre un registro, dentro de una sola instrucción. En consecuencia, la idea de una pseudoinstrucción que haga el trabajo de partir un valor inmediato proporcionado para que pueda ser cargado en un registro, ayuda a la legibilidad del código y facilita la tarea del programador.
+
+
+\begin{center}
+\large\textbf{-- \textsl{Carga de palabras (palabras de memoria a registro)} --}
+\end{center}
 
 \chapter{Problemas}
 

@@ -63,7 +63,7 @@ class MIPSLexer(RegexLexer):
             # (r'(for|in|while|do|return|if|else)\b', Keyword, 'slashstartsregex'),
             # (r'(var|macro|function)\b', Keyword.Declaration, 'slashstartsregex'),
             (r'(add|sub|addu|subu|addi|addiu|div|rem|mul|b|j|jal|jr|beq|beqz|bne|bnez|bge|bgeu|'
-                r'begz|bgt|bgtu|bgtz|ble|bleu|blez|blt|bltu|bltz|sltu|not|and|or|syscall|move|'
+                r'begz|bgt|bgtu|bgtz|ble|bleu|blez|blt|bltu|bltz|sltu|not|and|or|ori|syscall|move|'
                 r'la|lb|lw|li|lui|sw|sh|sb)\b', Name.Builtin),
             (r'(\'.\')', String.Char),
             (r'"(\\\\|\\"|[^"])*"', String.Double),
