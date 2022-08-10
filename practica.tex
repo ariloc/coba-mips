@@ -22,6 +22,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc,tikzmark,arrows}
 \usepackage{svg}
+\usepackage{color,soul}
 
 % mips-lexer.py HAS TO HAVE execution permissions for this to work
 % minted uses which to detect the file:
@@ -41,6 +42,9 @@
 \definecolor{autumn-blue-pyg}{HTML}{0000AA}
 \definecolor{autumn-gray-pyg}{HTML}{AAAAAA}
 \definecolor{autumn-teal-pyg}{HTML}{00AAAA}
+\definecolor{murphy-green-pyg}{HTML}{008000}
+\definecolor{murphy-periwinkle-pyg}{HTML}{ABABFF}
+\definecolor{murphy-deepsea-pyg}{HTML}{005487}
 
 \setlength{\textfloatsep}{0pt}
 \counterwithout{section}{chapter}
@@ -385,6 +389,72 @@ Pensando más a fondo, resulta claro el motivo de tener una pseudoinstrucción t
 \begin{center}
 \large\textbf{-- \textsl{Carga de palabras (palabras de memoria a registro)} --}
 \end{center}
+
+\subsection*{2.5 y 2.6}
+
+Como ya hemos dicho, la zona de memoria dedicada a instrucciones comienza a partir de la dirección \texttt{0x00400000}. Allí encontramos que el programa ensamblado ocupa 3 palabras, es decir, la única instrucción en el código después de la directiva \mintinline{mips}{.text} fue descompuesta por el ensamblador en tres instrucciones reales. Podemos ver cuáles son y los valores con los que son representados en memoria desde el panel de segmento de texto (Figura \ref{fig:c2-5}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.9\linewidth]{img/c2-5.png}
+    \caption{Direcciones de memoria, instrucciones y sus valores en memoria, posteriores al ensamblado del programa dado}
+    \label{fig:c2-5}
+\end{figure}
+
+Es curioso ver por qué el simulador tradujo la instrucción original en las 3 vistas en la figura anterior. Particularmente porque la instrucción \mintinline{mips}{lw} \textbf{no} es una pseudoinstrucción, sin mencionar que la última de las mencionadas 3 \textit{es una instrucción }\textsl{\mintinline{mips}{lw}}.
+
+Debemos de recordar que la etiqueta \texttt{palabra} apunta a una dirección de memoria, por lo que tiene una longitud de 32 bits. Ya vimos en la sección anterior que es imposible contener un valor de tamaño tal en una sola instrucción, y es justamente por esto que el simulador recurre a un par de instrucciones adicionales para traducir la instrucción en el programa, a código máquina.
+
+De esta forma, vemos en la primera instrucción traducida, el comienzo de un mecanismo muy similar al visto en la traducción de la pseudoinstrucción \mintinline{mips}{li}, donde los 2 bytes más significativos del valor inmediato son cargados en el registro temporal \mintinline{mips}{$at} mediante la instrucción \mintinline{mips}{lui}. Sin embargo, en contraste con el proceso visto en la Cuestión anterior, no se hace uso de la instrucción \mintinline{mips}{ori}.
+
+La segunda de las instrucciones traducidas añade el valor del registro ingresado \mintinline{mips}{$0} (que ya sabemos siempre contendrá un cero) a los dos bytes más altos de \texttt{palabra} cargados en \mintinline{mips}{$at}, pareciendo ignorar los dos bytes menos significativos de \texttt{palabra}. Así luego, la tercera instrucción traducida utiliza como destino al registro así indicado en la instrucción original (\mintinline{mips}{$s0}), y el registro \mintinline{mips}{$at} junto con un valor inmediato \texttt{0x00000000} como dirección de memoria desde la cual cargar, permitiendo usar directamente el valor en \mintinline{mips}{$at} sin modificarlo.
+
+A pesar de la omisión mencionada, como la dirección de \texttt{palabra} en este caso tiene sus dos bytes menos significativos en 0, el código ensamblado funciona correctamente. Por este motivo, podemos probar agregar en el código la declaración de una palabra adicional antes de \texttt{palabra}, que obligue a esta última a ubicarse en una posición de memoria donde sus dos bytes menos significativos sean distintos de cero:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c2-6.asm}
+\vspace{7pt}
+
+Tras ensamblar el código con esta modificación, si bien no vemos instrucciones adicionales que consideren los dos bytes que creíamos eran omitidos, resulta que éstos son contemplados a partir del valor inmediato de la tercera instrucción traducida \mintinline{mips}{lw}. Como ésta admite una media palabra como valor inmediato, puede contener aquellos bytes menos significativos y sumárselos a los otros dos más significativos cargados en \mintinline{mips}{$at}, efectivamente representando la dirección de memoria de \texttt{palabra}, cuyo valor quiere cargarse en el registro \mintinline{mips}{$s0}.
+
+Es por esto que vemos en el panel del segmento de texto, que el valor inmediato de \mintinline{mips}{lw} es \texttt{0x00000004}, para contar por el desfase de bytes que tuvo la etiqueta \texttt{palabra} tras agregar la declaración de una variable con la directiva \mintinline{mips}{.word} al comienzo del segmento de datos (\mintinline{mips}{.data}) [Fig. \ref{fig:c2-6}].
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.9\linewidth]{img/c2-6.png}
+    \caption{Panel del segmento de texto tras introducir la declaración de una nueva variable del largo de una palabra, anterior a la declaración de \texttt{palabra}}
+    \label{fig:c2-6}
+\end{figure}
+
+\subsection*{2.7}
+
+\begin{itemize}
+    \usemintedstyle{murphy}
+    \item \mintinline{mips}{lui $1, 0x00001001} $\rightarrow$ \texttt{0x3c011001} = \texttt{\textcolor{murphy-green-pyg}{001111}00 000\textcolor{murphy-periwinkle-pyg}{00001} \textcolor{murphy-deepsea-pyg}{00010000 00000001}}
+    \begin{itemize}
+        \item \mintinline{mips}{lui} es la instrucción, su opcode es \texttt{0xF}, abarca los primeros 6 bits.
+        \item \mintinline{mips}{$1} es el registro de destino, abarca 5 bits.
+        \item \mintinline{mips}{0x00001001} o acortado \mintinline{mips}{0x1001} es un valor inmediato con una longitud de media palabra (últimos 16 bits).
+    \end{itemize}
+
+    La instrucción carga en los 16 bits más significativos del registro identificado como \mintinline{mips}{$1}, el valor inmediato \mintinline{mips}{0x1001}.
+
+    \item \texttt{\textcolor{murphy-green-pyg}{addu} \textcolor{cyan}{\$1}, \textcolor{magenta}{\$1}, \textcolor{Fuchsia}{\$0}} $\rightarrow$ \texttt{0x00200821} = \texttt{\textcolor{murphy-green-pyg}{000000}\textcolor{magenta}{00 001}\textcolor{Fuchsia}{00000} \textcolor{cyan}{00001}000 00\hl{100001}}
+    \begin{itemize}
+        \item \texttt{\textcolor{murphy-green-pyg}{addu}} es la instrucción, abarca los primeros 6 bits y comparte un opcode \texttt{0x0} con otras instrucciones.
+        
+        Se identifica de otras instrucciones con dicho opcode a partir de los bits en el campo conocido como \textit{funct}, que en este caso es \texttt{0x21}, y está arriba \hl{resaltado en amarillo}.
+
+        \item \texttt{\textcolor{cyan}{\$1}} es el registro de destino, abarca 5 bits.
+        \item \texttt{\textcolor{magenta}{\$1}} y \texttt{\textcolor{Fuchsia}{\$0}} son ambos registros de origen y operandos de la instrucción, abarcan 5 bits cada uno.
+    \end{itemize}
+
+    La instrucción escribe en el registro de destino \textcolor{cyan}{\texttt{\$1}}, el resultado de la suma \textit{no signada} (es decir, sin importar el signo) de los números almacenados en los registros de origen \texttt{\textcolor{magenta}{\$1}} y \texttt{\textcolor{Fuchsia}{\$0}}. Sabiendo que \texttt{\textcolor{Fuchsia}{\$0}} siempre contiene el número cero, y que el otro de los registros de origen es el mismo que el registro de destino, entonces el valor no cambia.
+
+    \item % TODO: SEGUIR!
+\end{itemize}
 
 \chapter{Problemas}
 
