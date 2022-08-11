@@ -169,6 +169,7 @@ Como ya sabemos, al no especificar ningún argumento para la directiva \mintinli
 Además, al tratarse de un único byte, y considerando que el valor indicado \texttt{0x10} no supera el tamaño permitido por la directiva (el máximo valor posible sería \texttt{0xFF}), éste se almacenaría ``al comienzo de la palabra'', efectivamente implicando que el valor de la palabra que contiene el byte sea el mismo al especificado. Al fin y al cabo, el tamaño de una palabra es mayor al de un byte (justamente, 4 bytes), por lo que resulta en que el valor de la palabra sea el mismo al valor del tamaño de un byte, antecedido por 0s que no cambian el entero final almacenado.
 
 \subsection*{1.9 y 1.10}
+\label{sec:c1-10}
 
 En este caso, se almacenan los valores \textbf{\texttt{0x40302010}} y \textbf{\texttt{0x10203040}} en las posiciones de memoria \textbf{\texttt{0x10010000}} y \textbf{\texttt{0x10010004}} respectivamente.
 
@@ -513,6 +514,27 @@ Go: execution terminated with errors.
 Resulta que, como venimos insistiendo a lo largo del trabajo, las palabras en la memoria deben estar necesariamente alineadas con direcciones múltiplos de 4. Esto no excluye el acceso a la memoria, por lo que, sabiendo que \texttt{palabra} sí es una dirección de memoria válida, la dirección de memoria \texttt{palabra+1} resulta inválida al no ser múltiplo de 4 (considerando obvio que la dirección de memoria debe ser la del \textbf{primer} byte de la palabra). Debemos de entender que al sumarle un \texttt{1} a la dirección, a partir de cambiar el valor inmediato de la instrucción \mintinline{mips}{lw}, ésto la avanza en una posición, que se corresponde con un byte; no cuatro. 
 
 De hecho, el error nos indica cuál es la dirección de memoria que produjo el error: \textbf{\texttt{0x10010001}}. Si el valor al que apunta \texttt{palabra} es el primero (y único) declarado en el segmento de datos, por defecto su dirección será \texttt{0x10010000}. Fácilmente se puede ver que \texttt{0x10010000} + 1 = \texttt{0x10010001}.
+
+\subsection*{2.11}
+
+Finalmente, para poder guardar los dos bytes de mayor peso (los más significativos) de \texttt{palabra} en \mintinline{mips}{$s0}, podemos ajustar el offset del valor inmediato de la instrucción \mintinline{mips}{lh} en \textit{2} posiciones respecto a la posición de \texttt{palabra}.
+
+Esto funciona ya que al especificar una dirección, como estamos indicando que se cargue una media palabra, la operación será aplicada sobre el byte en la posición utilizada como argumento y la siguiente a ella; son 2 bytes. Por lo tanto, considerando lo explorado en la Cuestión \hyperref[sec:c1-10]{1.10}, sabiendo que MIPS (o al menos el simulador utilizado) almacena los valores bajo el formato \textit{Little-Endian}, implicaría que si utilizamos \texttt{palabra+2} como parámetro a \mintinline{mips}{lh}, los dos bits más significativos de la palabra serían cargados en el registro.
+
+Recordar que \textit{Little-Endian} es un formato/orden donde los bits menos significativos se ubican en las posiciones de memoria más bajas. En este sentido, si no desfásaramos la posición de memoria de \texttt{palabra}, se tomarían los dos bits \textit{menos} significativos. Pues si la palabra comienza en la posición apuntada por la etiqueta, como ésta es la posición de memoria más baja entre las 4 que abarca, bajo el concepto de Little-Endian, resultaría que las primeras dos posiciones se corresponden con los bits de menor peso.
+
+El código resultante es el siguiente:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c2-11.asm}
+\vspace{7pt}
+
+Llama la atención que al tratarse de medias palabras, no hay fallos del simulador en cuanto a que la dirección especificada no sea múltiplo de 4. Al parecer, con \textit{halfwords}, las direcciones deben estar alineadas con múltiplos de 2, ya que si intentamos reemplazar la instrucción [\mintinline[escapeinside=||]{mips}{lh $s0, |\hl{2}|($t0)}] con \mintinline[escapeinside=||]{mips}{lh $s0, |\hl{3}|($t0)}, el simulador falla al ejecutar el programa de una forma muy similar a la vista en la Figura \ref{fig:error-exec-2-10}. La única diferencia es que el mensaje advierte sobre el \texttt{halfword boundary} en vez del \texttt{word boundary}.
+
+
+\begin{center}
+\large\textbf{-- \textsl{Carga de bytes (bytes de memoria a registro)} --}
+\end{center}
 
 \chapter{Problemas}
 
