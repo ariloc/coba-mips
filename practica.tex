@@ -152,6 +152,7 @@ Con esto en cuenta, el ensamblador, sabiendo que indicamos el espacio para datos
 
 \begin{center}
 \large\textbf{-- \textsl{Declaración de bytes en memoria} --}
+\label{sec:decl-byte-mem}
 \end{center}
 
 \subsection*{1.7 y 1.8}
@@ -395,6 +396,7 @@ Pensando más a fondo, resulta claro el motivo de tener una pseudoinstrucción t
 \end{center}
 
 \subsection*{2.5 y 2.6}
+\label{sec:c2-6}
 
 Como ya hemos dicho, la zona de memoria dedicada a instrucciones comienza a partir de la dirección \texttt{0x00400000}. Allí encontramos que el programa ensamblado ocupa 3 palabras, es decir, la única instrucción en el código después de la directiva \mintinline{mips}{.text} fue descompuesta por el ensamblador en tres instrucciones reales. Podemos ver cuáles son y los valores con los que son representados en memoria desde el panel de segmento de texto (Figura \ref{fig:c2-5}).
 
@@ -433,6 +435,7 @@ Es por esto que vemos en el panel del segmento de texto, que el valor inmediato 
 \end{figure}
 
 \subsection*{2.7}
+\label{sec:c2-7}
 
 \begin{itemize}
     \usemintedstyle{murphy}
@@ -516,6 +519,7 @@ Resulta que, como venimos insistiendo a lo largo del trabajo, las palabras en la
 De hecho, el error nos indica cuál es la dirección de memoria que produjo el error: \textbf{\texttt{0x10010001}}. Si el valor al que apunta \texttt{palabra} es el primero (y único) declarado en el segmento de datos, por defecto su dirección será \texttt{0x10010000}. Fácilmente se puede ver que \texttt{0x10010000} + 1 = \texttt{0x10010001}.
 
 \subsection*{2.11}
+\label{sec:c2-11}
 
 Finalmente, para poder guardar los dos bytes de mayor peso (los más significativos) de \texttt{palabra} en \mintinline{mips}{$s0}, podemos ajustar el offset del valor inmediato de la instrucción \mintinline{mips}{lh} en \textit{2} posiciones respecto a la posición de \texttt{palabra}.
 
@@ -536,8 +540,180 @@ Llama la atención que al tratarse de medias palabras, no hay fallos del simulad
 \large\textbf{-- \textsl{Carga de bytes (bytes de memoria a registro)} --}
 \end{center}
 
-\chapter{Problemas}
+\subsection*{2.12}
 
+Al ensamblar el programa, vemos que la instrucción \mintinline{mips}{lb} es traducida en memoria de instrucciones de forma muy similar a cómo lo hemos visto con la instrucción \mintinline{mips}{lw} en la Cuestión \hyperref[sec:c2-6]{2.6}. Como ya vimos, el Assembler lleva a cabo este procedimiento debido a la incapacidad de poder especificar directamente direcciones de memoria completas en una sola instrucción. Po ello, debe recurrir a un procedimiento análogo al mencionado en la anterior Cuestión:
+
+\begin{enumerate}
+    \item Cargar los 2 bytes más significativos de la dirección de memoria a la que apunta, en este caso \texttt{octeto}, al registro temporal \mintinline{mips}{$at}. [Instrucción \mintinline{mips}{lui}]
+    \item Añadir el valor del registro especificado en conjunto con el valor inmediato (\mintinline{mips}{$0} para este caso), al valor en \mintinline{mips}{$at}. [Instrucción \mintinline{mips}{addu}]
+    \item Reformular la instrucción \mintinline{mips}{lb} sumando el registro \mintinline{mips}{$at} a un valor inmediato que contiene los dos bits menos significativos de \texttt{octeto}.
+\end{enumerate}
+
+Es decir, en resumen, si bien \mintinline{mips}{lb} carga el byte de una dirección de memoria en un registro, la forma de especificar la dirección, como es para nuestro ejemplo con la etiqueta \texttt{octeto}, no cambia el hecho que su longitud sea de 32 bits, y que por ello deba de cargarse como ya hemos visto, por las limitaciones de la longitud de los registros de instrucciones.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.9\linewidth]{img/c2-12.png}
+    \caption{Instrucciones traducidas por el simulador tras ensamblar el programa dado}
+\end{figure}
+
+\subsection*{2.13 y 2.14}
+\label{sec:c2-14}
+
+Al ejecutar el programa, nos encontramos con un compartamiento un poco diferente al esperado. Lo que probablemente creíamos que sucedería es que, tal y como nos fue dicho en la teoría, que el byte en la dirección de memoria \texttt{octeto} se cargue en el registro \mintinline{mips}{$s0}. Sin embargo, el valor que termina cargándose en dicho registro, es \textbf{\texttt{0xfffffff3}}.
+
+Ante la disyuntiva propuesta luego en la Cuestión 2.14, probamos ejecutar el programa tras cambiar la instrucción \mintinline{mips}{lb} por \mintinline{mips}{lbu}. Efectivamente, al correr el programa con este cambio, sí produce el efecto esperado. Ahora se carga el valor \textbf{\texttt{0x000000f3}} en el registro.
+
+La pregunta entonces es, ¿cuál es la diferencia entre \mintinline{mips}{lb} y \mintinline{mips}{lbu}? ¿qué significa esa \texttt{u} al final?
+
+\begin{figure}[h]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l l r c l}
+        \texttt{octeto} y \mintinline{mips}{$s0} (\mintinline{mips}{lbu}) & $\rightarrow$ & \texttt{0xf3} &=& \texttt{00000000 00000000 00000000 11110011} \\
+        \mintinline{mips}{$s0} (\mintinline{mips}{lb}) & $\rightarrow$ & \texttt{0xfffffff3} &=& \texttt{11111111 11111111 11111111 11110011}
+    \end{tabular}
+
+    \caption{Representaciones binarias de los números con los que trabajamos}
+    \label{fig:bin-2-14}
+\end{figure}
+
+Curiosamente, ya hemos visto la \texttt{u} mencionada al final de una instrucción: en \mintinline{mips}{addu}. Para entender mejor esto, veamos las representaciones binarias de los números tratados (Fig. \ref{fig:bin-2-14}).
+
+Como podemos ver, la única diferencia entre ambos números es el estado de los bits en los primeros tres bytes de mayor peso: con \mintinline{mips}{lb} son todos establecidos en 1, mientras que se mantienen en 0 con \mintinline{mips}{lbu}.
+
+Consultando en documentación de MIPS, resulta que dicha \texttt{u} proviene de \textit{\textbf{u}nsigned}. Nos estábamos saltando por alto la forma en la que la computadora interpretaba internamente los números.
+
+Según hemos visto con LC-3, necesariamente los números deben estar representados en código binario para poder ser almacenados en la memoria. Por lo tanto, si bien en el simulador vemos su representación hexadecimal (o decimal, cambiando una opción), no podemos simplemente asumir que los números se van a sumar mágicamente como estamos acostumbrados.
+
+Con esto en cuenta, debemos comprender que en el caso de MIPS, los números son representados como complemento a 2 (\textit{2's complement}), y soporta operaciones tanto con números \texttt{signed} como \texttt{unsigned}. Nos referimos a que con los números \texttt{signed}, podemos representar números negativos, con el costo de poder representar poco menos de la mitad de números positivos (concretamente, $2^{31} - 1$ positivos, pero también $2^{31}$ negativos, y el 0). Así, cuando una instrucción que lleve a cabo operaciones aritméticas o que maneje números en memoria, no tenga una letra \texttt{u} al final de su nombre, se entiende que tratará los valores proporcionados como enteros signados.
+
+Volviendo entonces a la diferencia entre el comportamiento de \mintinline{mips}{lb} y \mintinline{mips}{lbu}, podemos entender cómo \mintinline{mips}{lb}, al ver que el bit más significativo en el byte al que apunta \texttt{octeto} es un 1 (indicando que es negativo), al ser cargado en un registro con una longitud del cuádruple del valor dicho, extiende aquel \textit{1} hacia todos los bits nuevos en el registro \mintinline{mips}{$s0}, con el fin de \textbf{mantener el signo} del número original.
+
+En cambio, como \mintinline{mips}{lbu} trata los números como enteros sin signo, ignora este detalle, y carga el valor en el registro, dejando el resto de bits en 0.
+
+\subsection*{2.15}
+
+Si se cambia la definición de \texttt{octeto} para ahora apuntar a un byte cuyo valor sea \texttt{0x30}, no existe diferencia entre el uso de \mintinline{mips}{lb} y \mintinline{mips}{lbu}. Esto se debe a que si observamos la representación binaria de \texttt{0x30} (\texttt{00110000}), el estado del bit más significativo es 0, indicando que como entero signado, es positivo. Por consecuencia, si usamos \mintinline{mips}{lb}, para mantener el signo establecerá los bits restantes en \mintinline{mips}{$s0} en 0. Mientras, como \mintinline{mips}{lbu} ya por defecto deja el resto de bits en 0, el efecto de ambas instrucciones es el mismo.
+
+\subsection*{2.16}
+
+Definiendo ahora a \texttt{octeto} para apuntar al valor de una palabra cuyo valor sea \texttt{0x10203040}, el valor cargado en \mintinline{mips}{$s0} es \textbf{\texttt{0x00000040}}.
+
+El motivo de esto es similar al visto en la Cuestión \hyperref[sec:c2-11]{2.11} usando la instrucción \mintinline{mips}{lb} para cargar bytes, en vez de \mintinline{mips}{lh} para medias palabras. Cuando \mintinline{mips}{lb} recibe la dirección de memoria del comienzo de la palabra a la que apunta \texttt{octeto}, la instrucción interpretará cargar en el registro el byte que se encuentra en esa dirección. Sabiendo que el simulador almacena los valores en memoria bajo el formato \textit{Little-Endian}, el valor de este byte será entonces el de los 4 bits menos significativos de la palabra en \texttt{octeto}, el cual en este caso es \texttt{0x40}.
+
+Además, el hecho considerar el número como signado mediante el uso de \mintinline{mips}{lb} no afecta a los bits restantes en el registro, pues el estado del bit más significativo en \texttt{0x40} es 0.
+
+\subsection*{2.17}
+
+Cambiando la instrucción en \texttt{main} para cargar en el registro el valor en \texttt{octeto+1}, en vez de \texttt{octeto}, resulta en que el valor en \mintinline{mips}{$s0} sea \textbf{\texttt{0x00000020}} tras ejecutar el programa.
+
+En este caso no se produce error alguno, a diferencia de cómo si habíamos visto que sucedía con la instrucción \mintinline{mips}{lw} para cargar palabras, por ejemplo. La razón de esto es que en este caso estamos cargando \textit{bytes}, por lo que cualquier direccción de memoria es válida para un byte. El concepto de que ``la memoria esté alineada'' con múltiplos de 4 no aplica para bytes, ya que con las palabras, éstas tienen una longitud de 4 bytes, mientras las variables declaradas como \mintinline{mips}{.byte}, bueno, ocupan un byte. En todo caso, la regla consistiría en que las direcciones de memoria ``estén alineadas con múltiplos de 1'', lo cual abarca a todas las direcciones de memoria posibles.
+
+La idea de que la memoria esté alineada está directamente relacionada con la longitud del campo con el que tratamos. Con \textit{palabras} es con múltiplos de 4 por sus 4 bytes de longitud, con \textit{medias palabras} es con múltiplos de 2 por sus 2 bytes de longitud, y con los \textit{bytes} es con múltiplos de 1 por su único 1 byte de longitud.
+
+En lo que concierne al motivo del valor cargado en \mintinline{mips}{$s0}, estamos viendo el efecto de haber cargado el valor al que apunta la etiqueta \texttt{siguiente}. Como \texttt{octeto} apunta a un \mintinline{mips}{.byte}, según lo ya visto en el apartado de \textsl{\hyperref[sec:decl-byte-mem]{declaración de bytes en memoria}}, como la siguiente variable declarada (\texttt{siguiente}) también es del tipo \mintinline{mips}{.byte}, éste se ubica en la posición de memoria inmediatamente siguiente a la de \texttt{octeto}. Por lo tanto, la dirección a la que apunta \texttt{octeto+1}, es efectivamente la misma a la que apunta \texttt{siguiente}, la cual contiene el byte \texttt{0x20} que fue cargado en \mintinline{mips}{$s0}.
+
+Comentar también que como el estado del bit más significativo en \texttt{0x20} es 0, no se presentan diferencias que partan del uso de \mintinline{mips}{lb} para cargar este valor en el registro \mintinline{mips}{$s0}.
+
+
+\begin{center}
+    \large\textbf{-- \textsl{Almacenado de palabras (palabras de registro a memoria)} --}
+\end{center}
+
+\subsection*{2.18}
+\label{sec:c2-18}
+
+La primera instrucción del programa es \mintinline{mips}{lw}, la cual ya hemos visto y mencionado reitaradas veces en este trabajo. En consecuencia, su traducción por parte del simulador es idéntica a la descripta y analizada en la Cuestión \hyperref[sec:c2-7]{2.7}. Ver la Figura \ref{fig:c2-18} por el detalle de este caso concreto.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.9\linewidth]{img/c2-18}
+    \caption{Traducción del simulador de la primera instrucción del programa provisto}
+    \label{fig:c2-18}
+\end{figure}
+
+\subsection*{2.19}
+
+Para poder comprobar mejor el efecto de la ejecución del programa, comparemos lado a lado el estado de la memoria antes y después de ejecutarlo (Fig. \ref{fig:side-by-side-2-19}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \subfloat[Estado antes de ejecutar el programa]{\includegraphics[width=.6\linewidth]{img/c2-19a}}\\
+    \subfloat[Estado después de ejecutar el programa]{\includegraphics[width=.6\linewidth]{img/c2-19b}}
+    \caption{Comparación del estado de los valores de la memoria, antes y después de ejecutar el programa}
+    \label{fig:side-by-side-2-19}
+\end{figure}
+
+Antes de ejecutar el programa, están cargados 3 valores en memoria, cada una ocupando el espacio de una palabra. En orden: \texttt{0x10203040}, \texttt{0x00000000} y \texttt{0xffffffff}.
+
+Tras ejecutar el programa, las tres palabras contienen el mismo valor: \textbf{\texttt{0x10203040}}.
+
+Si vemos el paso a paso de las instrucciones del programa, podemos entender el motivo de esto:
+
+\begingroup
+\setlength{\emergencystretch}{3em}
+\begin{enumerate}
+    \item La instrucción \mintinline{mips}{lw} carga la palabra en la dirección de memoria marcada con la etiqueta \texttt{palabra1}, \textbf{\texttt{0x10203040}}, en el registro \mintinline{mips}{$s0}.
+    \item Luego, la instrucción \mintinline{mips}{sw} \textbf{escribe} el valor en el registro \mintinline{mips}{$s0}, \textbf{\texttt{0x10203040}}, en la dirección de memoria a la que apunta \texttt{palabra2} (recordar que no agregamos offset porque el registro de operando es \mintinline{mips}{$0}, que siempre contiene el valor 0), \textbf{reemplazando} el valor anteriormente allí almacenado, \textsl{\texttt{0x00000000}}.
+    \item Finalmente, de forma similar a la anterior instrucción, \mintinline{mips}{sw} \textbf{escribe} el valor de \mintinline{mips}{$s0} (\textbf{\texttt{0x10203040}})  en la dirección de memoria a la que apunta la etiqueta \texttt{palabra3}, \textbf{reemplazando} el valor anteriormente allí almacenado \texttt{0xffffffff}.
+\end{enumerate}
+\endgroup
+
+En conclusión, el programa sobreescribe el valor en las palabras a las que apuntan las etiquetas \texttt{palabra2} y \texttt{palabra3}, con el valor en la palabra a la que apunta \texttt{palabra1}.
+
+\begin{center}
+    \large\textbf{-- \textsl{Almacenado de bytes (bytes de registro a memoria)} --}
+\end{center}
+
+\subsection*{2.20}
+
+Al igual que en la Cuestión \hyperref[sec:c2-18]{2.18}, la primera instrucción es \mintinline{mips}{lw}, por lo que ya sabemos cómo es traducida por el simulador.
+
+En cuanto a la instrucción \mintinline{mips}{sw}, su traducción es similar a la de \mintinline{mips}{sw}, donde la forma en la que se carga la dirección de memoria a la que apunta \texttt{octeto} se corresponde con la ya descripta en la Cuestión \hyperref[sec:c2-6]{2.6}, con la diferencia de que la tercera instrucción es \mintinline{mips}{sb} en vez de \mintinline{mips}{lw}, pues es la instrucción que tradujo el simulador.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \includegraphics[width=.9\linewidth]{img/c2-20}
+    \caption{Traducción de las instrucciones del programa por el simulador}
+\end{figure}
+
+\subsection*{2.21}
+
+Antes de ejecutar el programa, \texttt{octeto} apunta a un espacio en memoria del tamaño de media palabra.
+
+Luego de correrlo, la instrucción \mintinline{mips}{lw} carga la palabra a la que apunta \texttt{palabra} (\texttt{0x10203040}), en el registro \mintinline{mips}{$s0}. Posteriormente, aquel valor es utilizado por la instrucción \mintinline{mips}{sb} para escribir el byte \textbf{menos significativo} de la palabra, en la dirección de memoria a la que apunta \texttt{octeto}. Como dijimos que el valor es \texttt{0x10203040}, su byte menos significativo se encuentra en la primera posición de memoria de la palabra (por la naturaleza \textit{Little-Endian} del simulador), así éste byte siendo \textbf{\texttt{0x40}}.
+
+En consecuencia, \texttt{octeto} guarda el valor \textbf{\texttt{0x0040}}, el cual expresamos como media palabra pues ésta es la longitud del espacio a la que apunta la etiqueta.
+
+\subsection*{2.22}
+
+Para lograr el cambio pedido, podemos cambiar la instrucción [\mintinline{mips}{sb $s0, octeto($0)}], por [\mintinline[breaklines]{mips}{sb $s0, octeto+1($0)}]. Producto de este cambio, ahora \texttt{octeto} contiene el valor \textbf{\texttt{0x4000}} tras ejecutar el programa.
+
+Antes, al usar \texttt{octeto} directamente, se apuntaba al byte menos significativo del espacio al que la etiqueta apuntaba, por el formato \textit{Little-Endian}. Al desfasar la dirección de memoria por un byte (reemplzando \texttt{octeto} por \texttt{octeto+1}), ahora el byte menos significativo de la palabra almacenada en \mintinline{mips}{$s0} (allí cargada por la instrucción previa \mintinline{mips}{lw}), se escribe mediante el uso de \mintinline{mips}{sb} en el segundo byte menos significativo de \texttt{octeto} (que siendo el caso de una media palabra, es directamente la posición de mayor peso).
+
+Es por este motivo que ahora \texttt{octeto} toma el valor \texttt{0x4000}, y en el código original \texttt{0x0040}: vemos el desfase de un byte de la posición a la que \mintinline{mips}{sb} escribe.
+
+\subsection*{2.23}
+
+Notar que como el programa original utiliza la instrucción \mintinline{mips}{lw} para cargar la palabra \textbf{entera} en el registro \mintinline{mips}{$s0}, y luego \mintinline{mips}{sb} toma el byte menos significativo de allí para escribirlo en octeto, \textbf{no podemos} simplemente cambiar \texttt{palabra} por \texttt{palabra+3} en la instrucción \mintinline{mips}{lw}. La instrucción \mintinline{mips}{lw} requiere la posición de una palabra, entonces tiene que ser múltiplo de 4, a lo que \texttt{palabra+3} no cumple esta condición.
+
+Por lo tanto, para lograr la consigna pedida, podemos cambiar la instrucción \mintinline{mips}{lw} por \mintinline{mips}{lbu}, la cual ya vimos en la Cuestión \hyperref[sec:c2-14]{2.14}. De esta forma, ahora sí podemos reemplazar \texttt{palabra} por \texttt{palabra+3}, cargando desde un principio el byte ubicado en \texttt{palabra+3}, al registro \mintinline{mips}{$s0}. Luego la instrucción \mintinline{mips}{sb} tomará el byte en el registro, y lo escribirá en la posición de menor peso del espacio al cual apunta \texttt{octeto}.
+
+El código resultante es el siguiente:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c2-23.asm}
+\vspace{7pt}
+
+Aclarar que hacemos uso de la instrucción \mintinline{mips}{lbu} en vez de \mintinline{mips}{lb}, para evitar cualquier diferencia que pueda surgir de interpretar el byte como un número signado. Si bien, en teoría, en este caso no debería hacer la diferencia dado que el bit menos significativo de \texttt{0x10} no está prendido, usamos \mintinline{mips}{lbu} para más generalidad.
+
+\chapter{Problemas}
 
 \begin{center}
     \Large\textbf{-- Apartado 1 --}
@@ -630,5 +806,12 @@ Mientras, al guardar la matriz por columnas, entendemos que almacenamos las colu
     }
     \caption{Visualización de las dos formas de almacenar la matriz $A$ del ejercicio}
 \end{figure}
+
+
+\begin{center}
+    \Large\textbf{-- Apartado 2 --}
+\end{center}
+
+\section{}
 
 \end{document}
