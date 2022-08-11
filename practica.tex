@@ -23,6 +23,7 @@
 \usetikzlibrary{calc,tikzmark,arrows}
 \usepackage{svg}
 \usepackage{color,soul}
+\usepackage{tcolorbox}
 
 % mips-lexer.py HAS TO HAVE execution permissions for this to work
 % minted uses which to detect the file:
@@ -322,9 +323,9 @@ Con todo esto en cuenta, podemos decir resumidamente que:
 \end{center}
 
 \subsection*{2.1}
+\label{sec:c2-1}
 
 La dirección de memoria donde se encuentra la instrucción en cuestión es la \texttt{\textbf{0x00400000}}, y ocupa el tamaño de exactamente una palabra (4 bytes = 32 bits). El valor que la representa es \texttt{0x3c108690}. Como sabemos que es una traducción de código en Assembly que conocemos, podemos deducir las partes que lo componen. Sin embargo, si bien algunas de ellas pueden ser reconocidas desde su representación en hexadecimal, deberemos de remitirnos a su equivalente en binario para darle completo sentido a cómo es que realmente funciona.
-
 
 \begin{figure}[H]
     \centering
@@ -359,6 +360,8 @@ En la Figura \ref{fig:lui-mem-hex} vemos las 4 partes del valor en memoria para 
 Efectivamente, al correr el programa, los primeros 2 bytes del registro son cargados con el valor \texttt{0x8690}, así quedando la palabra almacenada en el registro como \textbf{\texttt{0x86900000}}.
 
 \subsection*{2.3 y 2.4}
+\label{sec:c2-4}
+
 De forma similar a la Cuestión anterior, el dato inmediato especificado como argumento a la instrucción \mintinline{mips}{li} es cargado en el registro indicado como argumento. La diferencia es que este valor es del tamaño de una palabra completa, en vez de media palabra como sucedía con la instrucción \mintinline{mips}{lui}.
 
 Ante esto, tras revisar la interpretación del código ensamblado en el panel de texto (\textit{Text Segment}), vemos que, siendo que \mintinline{mips}{li} es realmente una \textit{pseudoinstrucción}, fue descompuesta en dos instrucciones del procesador: la ya vista \mintinline{mips}{lui}, y otra llamada \mintinline{mips}{ori}.\\
@@ -441,6 +444,7 @@ Es por esto que vemos en el panel del segmento de texto, que el valor inmediato 
 
     La instrucción carga en los 16 bits más significativos del registro identificado como \mintinline{mips}{$1}, el valor inmediato \mintinline{mips}{0x1001}.
 
+    \usemintedstyle{default}
     \item \texttt{\textcolor{murphy-green-pyg}{addu} \textcolor{cyan}{\$1}, \textcolor{magenta}{\$1}, \textcolor{Fuchsia}{\$0}} $\rightarrow$ \texttt{0x00200821} = \texttt{\textcolor{murphy-green-pyg}{000000}\textcolor{magenta}{00 001}\textcolor{Fuchsia}{00000} \textcolor{cyan}{00001}000 00\hl{100001}}
     \begin{itemize}
         \item \texttt{\textcolor{murphy-green-pyg}{addu}} es la instrucción, abarca los primeros 6 bits y comparte un opcode \texttt{0x0} con otras instrucciones.
@@ -453,8 +457,62 @@ Es por esto que vemos en el panel del segmento de texto, que el valor inmediato 
 
     La instrucción escribe en el registro de destino \textcolor{cyan}{\texttt{\$1}}, el resultado de la suma \textit{no signada} (es decir, sin importar el signo) de los números almacenados en los registros de origen \texttt{\textcolor{magenta}{\$1}} y \texttt{\textcolor{Fuchsia}{\$0}}. Sabiendo que \texttt{\textcolor{Fuchsia}{\$0}} siempre contiene el número cero, y que el otro de los registros de origen es el mismo que el registro de destino, entonces el valor no cambia.
 
-    \item % TODO: SEGUIR!
+\item \texttt{\textcolor{murphy-green-pyg}{lw} \textcolor{cyan}{\$16}, \textcolor{magenta}{0x00000000}(\textcolor{Fuchsia}{\$1})} $\rightarrow$ \texttt{0x8c300000} = \texttt{\textcolor{murphy-green-pyg}{100011}\textcolor{Fuchsia}{00 001}\textcolor{cyan}{10000} \textcolor{magenta}{00000000 00000000}}
+    \begin{itemize}
+        \item \texttt{\textcolor{murphy-green-pyg}{lw}} es la instrucción, su opcode es \texttt{0x23}, abarca los primeros 6 bits.
+        \item \texttt{\textcolor{cyan}{\$16}} es el registro de destino, abarca 5 bits.
+        \item \texttt{\textcolor{magenta}{0x00000000}} o acortado \texttt{\textcolor{magenta}{0x0000}} es un valor inmediato con una longitud de media palabra (últimos 16 bits).
+        \item \texttt{\textcolor{Fuchsia}{\$1}} es la dirección de un registro cuyo valor debe apuntar a una dirección de memoria (a la que luego se le sumará el valor inmediato en concepto de \textit{offset}). Abarca 5 bits.
+    \end{itemize}
+
+    La instrucción carga en el registro de destino \texttt{\textcolor{cyan}{\$16}} (también conocido como \mintinline{mips}{$s0}), el valor contenido en la dirección de memoria obtenida de la suma entre: el valor contenido en el registro \texttt{\textcolor{Fuchsia}{\$1}}, y el valor inmediato proporcionado \texttt{\textcolor{magenta}{0x0000}}.
 \end{itemize}
+
+\subsection*{2.8}
+
+Como es de esperarse, al correr el programa, como \texttt{palabra} apunta a la dirección de memoria \texttt{0x10010000}, y el registro \mintinline{mips}{$0} siempre contiene un valor 0; se carga el valor contenido en la dirección \texttt{0x10010000} (o sea, directamente a la que apunta \texttt{palabra}), \texttt{\textbf{0x10203040}}, en el registro de destino \mintinline{mips}{$s0}.
+
+\subsection*{2.9}
+
+Para poder cargar la dirección de un dato en un registro, podemos usar la pseudoinstrucción \mintinline{mips}{la}. De esta forma podemos modificar el programa del ejercicio de manera que haga uso de dicha pseudoinstrucción, pero cumpliendo la misma tarea que el código original:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c2-9.asm}
+\vspace{7pt}
+
+Verificando el panel del segmento de texto, podemos ver que la pseudoinstrucción utilizada, de forma prácticamente idéntica a la instrucción \mintinline{mips}{li} vista en las Cuestiones \hyperref[sec:c2-1]{2.1}-\hyperref[sec:c2-4]{2.4}, fue sustituida por las instrucciones \mintinline{mips}{lui} y \mintinline{mips}{ori}. Éstos son utilizados por el programa ensamblado para poder cargar los 2 bytes más significativos, y los 2 menos significativos, en el registro \mintinline{mips}{$t0}, respectivamente.
+
+Como un comentario adicional, mencionar que hacemos uso del registro \mintinline{mips}{$t0} para almacenar la dirección de memoria a la que apunta la etiqueta \texttt{palabra}, ya que los registros comenzados en \textit{t} son generalmente utilizados para almacenar valores temporales. Es por esto la letra con la que comienzan: son \textit{\textbf{t}emporary}.
+
+\subsection*{2.10}
+
+Partiendo del programa ya modificado de la Cuestión anterior, modificarlo nuevamente para cargar en el registro \mintinline{mips}{$s0} la palabra que se encuentra desde \texttt{palabra+1} es tan sencillo como cambiar el valor inmediato de la instrucción \mintinline{mips}{lw}:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c2-10.asm}
+\vspace{7pt}
+
+Ahora, en vez de usar el valor \mintinline{mips}{0x0000}, usamos el número \mintinline{mips}{1}, para desfasar la dirección \texttt{+1} posiciones. Así vemos que también podemos usar valores decimales como valor inmediato de la instrucción \mintinline{mips}{lw}.
+
+Dicho esto, al intentar correr el programa, nos encontramos con un error de ejecución en la consola del simulador (Fig. \ref{fig:error-exec-2-10}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tcolorbox}[fontupper=\small, width=.8\linewidth]
+        \begin{Verbatim}[breaklines, breakanywhere, breaksymbol=, breakanywheresymbolpre=, commandchars=\\\{\}]
+Error in \textbf{[\textit{redacted}]}/c2-10.asm line 5: Runtime exception at 0x00400008: fetch address not aligned on word boundary 0x10010001
+
+Go: execution terminated with errors.
+        \end{Verbatim}
+    \end{tcolorbox}
+    \caption{Error en la consola del simulador al intentar correr el código modificado}
+    \label{fig:error-exec-2-10}
+\end{figure}
+
+Resulta que, como venimos insistiendo a lo largo del trabajo, las palabras en la memoria deben estar necesariamente alineadas con direcciones múltiplos de 4. Esto no excluye el acceso a la memoria, por lo que, sabiendo que \texttt{palabra} sí es una dirección de memoria válida, la dirección de memoria \texttt{palabra+1} resulta inválida al no ser múltiplo de 4 (considerando obvio que la dirección de memoria debe ser la del \textbf{primer} byte de la palabra). Debemos de entender que al sumarle un \texttt{1} a la dirección, a partir de cambiar el valor inmediato de la instrucción \mintinline{mips}{lw}, ésto la avanza en una posición, que se corresponde con un byte; no cuatro. 
+
+De hecho, el error nos indica cuál es la dirección de memoria que produjo el error: \textbf{\texttt{0x10010001}}. Si el valor al que apunta \texttt{palabra} es el primero (y único) declarado en el segmento de datos, por defecto su dirección será \texttt{0x10010000}. Fácilmente se puede ver que \texttt{0x10010000} + 1 = \texttt{0x10010001}.
 
 \chapter{Problemas}
 
