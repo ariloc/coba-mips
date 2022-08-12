@@ -713,6 +713,14 @@ El código resultante es el siguiente:
 
 Aclarar que hacemos uso de la instrucción \mintinline{mips}{lbu} en vez de \mintinline{mips}{lb}, para evitar cualquier diferencia que pueda surgir de interpretar el byte como un número signado. Si bien, en teoría, en este caso no debería hacer la diferencia dado que el bit menos significativo de \texttt{0x10} no está prendido, usamos \mintinline{mips}{lbu} para más generalidad.
 
+\section{Apartado 3}
+
+\begin{center}
+    \large\textbf{-- \textsl{Operaciones aritméticas con datos inmediatos (constantes)} --}
+\end{center}
+
+\subsection*{3.1}
+
 \chapter{Problemas}
 
 \begin{center}
@@ -722,35 +730,35 @@ Aclarar que hacemos uso de la instrucción \mintinline{mips}{lbu} en vez de \min
 \section{}
 
 \usemintedstyle{autumn}
-\inputminted{mips}{src/problemas/1.asm}
+\inputminted[linenos]{mips}{src/problemas/1.asm}
 \usemintedstyle{default}
 
 En \textcolor{autumn-red-pyg}{\textbf{rojo}} se indican las etiquetas, en \textcolor{autumn-blue-pyg}{\textbf{azul}} las directivas, en \textcolor{autumn-gray-pyg}{\textbf{gris}} los comentarios, y en \textcolor{autumn-teal-pyg}{\textbf{celeste}} las instrucciones.
 
 \section{}
 
-\inputminted{mips}{src/problemas/2.asm}
+\inputminted[linenos]{mips}{src/problemas/2.asm}
 
 Utilizo dos directivas \mintinline{mips}{.space} pasándoles el número \textit{80} como argumento pues si una palabra son 4 bytes, y cada vector tiene que tener 20 palabras: $20 \cdot 4\;\text{bytes} = 80\;\text{bytes}$.
 
 \section{}
 
-\inputminted{mips}{src/problemas/3.asm}
+\inputminted[linenos]{mips}{src/problemas/3.asm}
 
 
 \section{}
 
-\inputminted{mips}{src/problemas/4.asm}
+\inputminted[linenos]{mips}{src/problemas/4.asm}
 
 
 \section{}
 
-\inputminted[breaklines, breakbytokenanywhere]{mips}{src/problemas/5.asm}
+\inputminted[linenos, breaklines, breakbytokenanywhere]{mips}{src/problemas/5.asm}
 
 
 \section{}
 
-\inputminted{mips}{src/problemas/6.asm}
+\inputminted[linenos]{mips}{src/problemas/6.asm}
 
 En ambos casos uso vectors de bytes, ya que los números de la matriz son lo suficientemente pequeños para ser almacenados de esta manera.
 
@@ -813,5 +821,52 @@ Mientras, al guardar la matriz por columnas, entendemos que almacenamos las colu
 \end{center}
 
 \section{}
+
+\inputminted[linenos]{mips}{src/problemas/7.asm}
+
+Cabe mencionar que como los números del vector son menores al máximo número representable con una media palabra, podría definirse un vector de valores del tipo \mintinline{mips}{.half} en vez de \mintinline{mips}{.word}, acomodando las operaciones y desfases utilizados en el programa:
+
+\inputminted[linenos]{mips}{src/problemas/7b.asm}
+
+\section{}
+\label{sec:p8}
+
+Podemos extender el programa del ejercicio anterior y utilizar la instrucción \mintinline{mips}{sw} para cargar los valores que ya tenemos dentro de los registros \mintinline{mips}{$s0}-\mintinline{mips}{$s4}, en las palabras empezando desde la dirección \texttt{0x10010000}.
+
+Además, podemos intentar optimizar la cantidad de instrucciones reales que usa nuestro programa, lo cual considerando que MIPS es del tipo \textit{RISC} (donde cada instrucción real se ejecuta en un ciclo del procesador), ayudaría a la velocidad de nuestro programa. Por supuesto que con un programa tan pequeño, más aún corriendo en un simulador, no tiene mucho sentido optimizar la velocidad de ejecución del código. Sin embargo, resulta interesante explorar las distintas opciones y usos de las instrucciones ya vistas, para cumplir el objetivo del ejercicio.
+
+\inputminted[linenos]{mips}{src/problemas/8.asm}
+
+La idea fundamental de las optimizaciones realizadas, es evitar usar el uso de etiquetas o valores inmediatos muy grandes como parámetro a las instrucciones \mintinline{mips}{lw} o \mintinline{mips}{sw}, ahorrando las instrucciones adicionales que requiere cargar valores que superen la longitud de media palabra.
+
+Para lograr esto, indicamos los offsets en el campo del valor inmediato (ya que son números chicos), y usamos el campo del registro que es sumando para determinar la dirección de memoria desde la cual leer/escribir, con un registro temporal que contenga como valor la dirección de memoria inicial con la cual estamos copiando. Es decir, si queremos leer valores desde las direcciones \texttt{V}, \texttt{V+2}, ..., cargamos la dirección de \texttt{V} una sola vez a un registro temporal, y luego usamos ese registro como parámetro para la instrucción \mintinline{mips}{lw}, mientras los valores inmediatos que se indican en las instrucciones son \texttt{1}, \texttt{2}, ...
+
+\section{}
+
+Una forma de resolver el problema planteado es cargando la palabra dada en un registro, y luego ir cargando en orden inverso, byte por byte en el espacio de la nueva palabra.
+
+Para esto utilizaremos la instrucción \mintinline{mips}{lw} para cargar la palabra en \mintinline{mips}{$t1}, y luego la instrucción \mintinline{mips}{sb} para cargar los bytes en otro espacio de memoria. Como ésta última carga el byte menos significativo del registro, también usaremos la instrucción \mintinline{mips}{srl} que shiftea los bits hacia la derecha una cantidad de posiciones (concretamente 8 bits = 1 byte), descartando los bytes menos significativos una vez cargados en la nueva palabra, y corriendo de posición los más significativos a posiciones de menor peso para que podamos usar \mintinline{mips}{sb}.
+
+\inputminted[linenos]{mips}{src/problemas/9.asm}
+
+Como una alternativa, también podemos optar por una solución más rudimentaria, que aproveche la facilidad de cargar bytes desde una posición de memoria dada a un registro, y que luego los copie a otra posición de memoria en la palabra donde se almacenen los bytes en orden inverso. En este caso, podríamos prescindir del uso de la instrucción \mintinline{mips}{srl}, usando sólamente instrucciones vistas hasta este punto en el trabajo.
+
+\inputminted[linenos]{mips}{src/problemas/9b.asm}
+
+\section{}
+
+\inputminted[linenos]{mips}{src/problemas/10.asm}
+
+\section{}
+
+Considerando que los 4 bytes se encuentran a partir de la dirección de memoria \texttt{0x10010002}, podemos resolver el problema con dos pares de operaciones de lectura y escritura de medias palabras usando \mintinline{mips}{lh} y \mintinline{mips}{sh} respectivamente:
+\begin{itemize}
+    \item Copiar desde [\texttt{0x10010002}, \texttt{0x10010003}] a [\texttt{0x10010010}, \texttt{0x10010011}].
+    \item Copiar desde [\texttt{0x10010004}, \texttt{0x10010005}] a [\texttt{0x10010012}, \texttt{0x10010013}].
+\end{itemize}
+
+Además, cargamos las direcciones de memoria del vector almacenado y el espacio de memoria reservados con la instrucción \mintinline{mips}{la} en dos registros, para reducir la cantidad de operaciones según lo describimos en el \hyperref[sec:p8]{Problema 8}.
+
+\inputminted[linenos]{mips}{src/problemas/11.asm}
 
 \end{document}
