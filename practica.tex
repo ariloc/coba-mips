@@ -792,7 +792,104 @@ El programa resultante es el siguiente:
 
 \subsection*{3.8}
 
+Modificamos el código del enunciado para cumplir con la consigna, a partir de sustituir el valor inmediato usado en \mintinline{mips}{andi} por \textbf{\texttt{0xffff0001}}, ya que su representación en binario tiene los 16 bits más significativos y el bit 0 prendidos: \texttt{11111111 11111111 00000000 00000001}.
 
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c3-8.asm}
+\vspace{7pt}
+
+El valor almacenado en \texttt{numero+4} con estas modificaciones resulta \textbf{\texttt{0x00030001}}. Comparándolo con el valor original, cumple con la tarea solicitada.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l l r c l}
+        \texttt{numero} & $\rightarrow$ & \texttt{0x0003ff41} &=& \texttt{\textcolor{magenta}{00000000 00000011} \textcolor{gray}{11111111 0100000}\textcolor{magenta}{1}} \\
+    \texttt{numero+4} & $\rightarrow$ & \texttt{0x00030001} &=& \texttt{\textcolor{magenta}{00000000 00000011} \textcolor{gray}{00000000 0000000}\textcolor{magenta}{1}}
+    \end{tabular}
+
+    \caption{Representaciones binarias de la palabra original y el resultado tras ejecutar el programa modificado}
+    \label{fig:bin-3-8}
+\end{figure}
+
+\subsection*{3.9}
+
+Como el ejercicio requiere que ciertos bits queden en 1 en vez de 0, no podemos cumplir con la consigna tan solo modificando la instrucción \mintinline{mips}{andi}. Como se describe en la teoría, este operador puede mantener bits si es que están establecidos en ambos operandos, o apagarlos si es que se encuentra en este estado en alguno de los dos números. Por lo tanto, como no podemos modifcar el valor en la palabra, aplicando la operación de \texttt{AND} binario con un valor inmediato solo podemos apagar o mantener bits ya prendidos en \texttt{numero}.
+
+Para asegurarnos que los bits indicados siempre estén en 1 en el resultado, haremos uso de una instrucción adicional \mintinline{mips}{ori}, la cual aplica el \texttt{OR} binario entre un número en un registro y un valor inmediato. Esta operación mantiene un bit apagado si así se encuentra en \textbf{ambos} operandos, o permite encenderlo si el bit se encuentra en 1 en \textbf{alguno} de los dos números.
+
+Como tenemos control sobre el valor inmediato, tras haber hecho la operación \texttt{AND} necesaria para mantener los bits pedidos por el ejercicio, luego usamos la instrucción \mintinline{mips}{ori} con la constante \texttt{0xfffe}. Este valor que usamos como valor inmediato, tiene todos los 16 bits menos significativos prendidos, a excepción del bit 0 (que debía de permanecer igual que en \texttt{numero} para el resultado), asegurándonos que dichos bits siempre estén en 1: \texttt{11111111 11111110}.
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c3-9.asm}
+\vspace{7pt}
+
+El valor resultante de la ejecución del programa es \textbf{\texttt{0x0003ffff}}. Comparándolo con el valor original, cumple con la tarea solicitada.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l l r c l}
+        \texttt{numero} & $\rightarrow$ & \texttt{0x0003ff41} &=& \texttt{\textcolor{magenta}{00000000 00000011} \textcolor{cyan}{11111111 0100000}\textcolor{magenta}{1}} \\
+        \texttt{numero+4} & $\rightarrow$ & \texttt{0x0003ffff} &=& \texttt{\textcolor{magenta}{00000000 00000011} \textcolor{cyan}{11111111 1111111}\textcolor{magenta}{1}}
+    \end{tabular}
+
+    \caption{Representaciones binarias de la palabra original y el resultado tras ejecutar el programa modificado}
+    \label{fig:bin-3-9}
+\end{figure}
+
+\begin{center}
+    \large\textbf{-- \textsl{Operaciones de desplazamiento} --}
+\end{center}
+
+\subsection*{3.10, 3.11 y 3.14}
+
+Vemos que a pesar de haber realizado una operación de desplazamiento de bits a la derecha, si bien los bits menos significativos correspondientes fueron descartados, los 4 bits más significativos fueron rellenados con el valor 1. En concreto, estos últimos bits fueron rellenados acorde al bit de signo (el más significativo), el cual está prendido para el caso del valor al que apunta \texttt{numero} en nuestro programa. El valor almacenado en \mintinline{mips}{$t1} tras ejecutar el programa es \texttt{0xfffffff4}.
+
+Para entender mejor el motivo de esto, intentaremos ahora reemplazar la instrucción \mintinline{mips}{sra} por \mintinline{mips}{srl}. Ahora, al correr el programa, el valor guardado en el registro \mintinline{mips}{$t1} es \texttt{0x0ffffff4}. Es decir, con este cambio, los 4 bits más significativos \textbf{no} fueron rellenados con el bit de signo, y quedaron en 0.
+
+Lo que está sucediendo se encuentra en la diferencia entre las dos instrucciones utilizadas. Por un lado, \mintinline{mips}{sra} lleva a cabo del desplazamiento \textit{\textbf{a}ritmético} de un número hacia la derecha, una cantidad de posiciones indicadas como argumento. Mientras, \mintinline{mips}{srl} ejecuta el desplzamiento \textit{\textbf{l}ógico} de un número, una cantidad de posiciones dada.
+
+Con esto queremos decir que desde el punto de vista lógico, si desplazamos un número $n$ bits a la derecha, sabemos que los $n$ bits menos significativos serán descartados, y que el resto de bits se desplzarán de forma acorde, quedando las posiciones de los anteriores $n$ bits más significativos en 0, pues podemos decir que todo número tiene ``infinitos ceros'' a su izquierda. 
+
+En cambio, si queremos desplazar un número una cantidad de posiciones desde el punto de vista aritmético, lo más probable es que sea de interés mantener el signo del número original. Como shifteamos bits en un sistema de representación binario, correrlos $n$ posiciones a la derecha es equivalente a dividir el número por $2^n$ y redondear el resultado para abajo (operación floor).
+
+Considerando que al desplazar \texttt{numero} 4 posiciones a la derecha lo quisiéramos dividir por $2^4 = 16$, podemos terminar de cerrar la idea comparando las representaciones decimales de los números obtenidos con las instrucciones \mintinline{mips}{sra} y \mintinline{mips}{srl} (Fig. \ref{fig:bin-cmp-3-11}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l c c c l}
+        \texttt{numero} &=& \texttt{0xffffff41} &=& -191 \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{sra}) &=& \texttt{0xfffffff4} &=& -12 = $\lfloor\frac{-191}{16}\rfloor$ \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{srl}) &=& \texttt{0x0ffffff4} &=& 268435444
+    \end{tabular}
+    \caption{Diferencia en los resultados obtenidos entre desplazar \texttt{numero} con \mintinline{mips}{sra} y \mintinline{mips}{srl}}
+    \label{fig:bin-cmp-3-11}
+\end{figure}
+
+\subsection*{3.12 y 3.13}
+
+Para desplazar el contenido de \texttt{numero} 2 bits a la izquierda, reemplazamos la instrucción \mintinline{mips}{sra} por \mintinline{mips}{sll} y cambiamos el argumento de la cantidad de posiciones que se shiftea:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c3-12.asm}
+\vspace{7pt}
+
+Si comparamos la representación decimal del número original con el del resultado obtenido (Fig. \ref{fig:bin-cmp-3-13}), podemos ver que acabamos de multiplicar el número por $2^n$, siendo $n = 2$ la cantidad de posiciones que desplazamos del número, o sea, $2^2 = 4$.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l c c c l}
+        \texttt{numero} &=& \texttt{0xffffff41} &=& -191 \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{sll}) &=& \texttt{0xfffffd04} &=& -764 = $-191 \cdot 2^2$ \\
+    \end{tabular}
+    \caption{Diferencia entre el número original y el resultado obtenido usando \mintinline{sll}}
+    \label{fig:bin-cmp-3-13}
+\end{figure}
+
+% TODO: Hablar de por qué no existe sla, usamos sll, ver operación lógica, no necesitamos la otra(?)
 
 \chapter{Problemas}
 
