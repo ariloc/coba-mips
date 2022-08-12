@@ -47,7 +47,7 @@ class MIPSLexer(RegexLexer):
         'root': [
             include('commentsandwhitespace'),
             (r'(\.[a-z]+)\b', Keyword),
-            (r'(\$(3[01]|[12]\d|\d|(ra)|([vk][01])|(a[0-3t])|(t[0-9])|(s[0-7p])|([gsf]p)|(zero)|(f3[01]|f[12]\d|f\d)))\b', Name.Variable.Instance),
+            (r'(\$(3[01]|[12]\d|\d|(ra)|([vk][01])|(a[0-3t])|(t[0-9])|(s[0-7p])|([gsf]p)|(zero)|(hi)|(lo)|(f3[01]|f[12]\d|f\d)))\b', Name.Variable.Instance),
             (r'[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable),
             #(r'\$[$a-zA-Z_][\w.\-:$]*\s*[:=]\s', Name.Variable.Instance),
             (r'(\.\d+|[0-9]+\.[0-9]*)([eE][-+]?[0-9]+)?', Number.Float),
@@ -62,7 +62,7 @@ class MIPSLexer(RegexLexer):
             (r'[})\].]', Punctuation),
             # (r'(for|in|while|do|return|if|else)\b', Keyword, 'slashstartsregex'),
             # (r'(var|macro|function)\b', Keyword.Declaration, 'slashstartsregex'),
-            (r'(add|sub|addu|subu|addi|addiu|div|rem|mul|b|j|jal|jr|beq|beqz|bne|bnez|bge|bgeu|'
+            (r'(add|sub|addu|subu|addi|addiu|div|rem|mfhi|mflo|mul|mult|b|j|jal|jr|beq|beqz|bne|bnez|bge|bgeu|'
                 r'begz|bgt|bgtu|bgtz|ble|bleu|blez|blt|bltu|bltz|sltu|not|and|or|ori|syscall|move|'
                 r'la|lb|lbu|lh|li|lui|lw|sb|sh|srl|sw)\b', Name.Builtin),
             (r'(\'.\')', String.Char),

@@ -366,7 +366,7 @@ Efectivamente, al correr el programa, los primeros 2 bytes del registro son carg
 
 De forma similar a la Cuestión anterior, el dato inmediato especificado como argumento a la instrucción \mintinline{mips}{li} es cargado en el registro indicado como argumento. La diferencia es que este valor es del tamaño de una palabra completa, en vez de media palabra como sucedía con la instrucción \mintinline{mips}{lui}.
 
-Ante esto, tras revisar la interpretación del código ensamblado en el panel de texto (\textit{Text Segment}), vemos que, siendo que \mintinline{mips}{li} es realmente una \textit{pseudoinstrucción}, fue descompuesta en dos instrucciones del procesador: la ya vista \mintinline{mips}{lui}, y otra llamada \mintinline{mips}{ori}.\\
+Ante esto, tras revisar la interpretación del código ensamblado en el panel de texto (\textit{Text Segment}), vemos que, siendo que \mintinline{mips}{li} es realmente una \textit{pseudoinstrucción}, fue descompuesta en dos instrucciones del procesador: la ya vista \mintinline{mips}{lui}, y otra llamada \mintinline{mips}{ori}. \vspace{7pt}
 
 Conociendo ya el funcionamiento de \mintinline{mips}{lui} en base a lo visto en la Cuestión anterior, podemos entender que carga los primeros dos bytes (es decir, los más significativos) del valor inmediato utilizado en el código, al registro \mintinline{mips}{$at} (abreviación de \textit{Assembler Temporary}). Este registro está reservado por el ensamblador para las operaciones realizadas como \textit{pseudo comandos}, es decir, operaciones intermedias llevadas a cabo por las instrucciones reales que fueron obtenidas de la interpretación de una instrucción en el código Assembly.\footnote{\url{https://en.wikibooks.org/wiki/MIPS_Assembly/Register_File}} La interpretación de pseudoinstrucciones suele involucrar el uso del registro \mintinline{mips}{$at}, como es el caso en cuestión.
 
@@ -720,6 +720,79 @@ Aclarar que hacemos uso de la instrucción \mintinline{mips}{lbu} en vez de \min
 \end{center}
 
 \subsection*{3.1}
+
+El resultado de la suma efectuada se alamacena en el registro \mintinline{mips}{$t1}. Se suma 1 al valor de la palabra a la que apunta la etiqueta \texttt{numero}, el cual corresponde al máximo número positivo representable \texttt{0x7fffffff}. Por consiguiente, el valor contenido en \mintinline{mips}{$t1} tras ejecutar el programa es \textbf{\texttt{0x80000000}}.
+
+\subsection*{3.2 y 3.3}
+\label{sec:c3-3}
+
+Al intentar correr el programa después de cambiar la instrucción \mintinline{mips}{addiu} por \mintinline{mips}{addi}, vemos que la ejecución falla informándonos el motivo el origen del error en la consola (Fig. \ref{fig:error-overflow}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tcolorbox}[fontupper=\small, width=.8\linewidth]
+        \begin{Verbatim}[breaklines, breakanywhere, breaksymbol=, breakanywheresymbolpre=, commandchars=\\\{\}]
+Error in \textbf{[\textit{redacted}]}/c3-2.asm line 6: Runtime exception at 0x0040000c: arithmetic overflow
+
+Step: execution terminated with errors.
+        \end{Verbatim}
+    \end{tcolorbox}
+    \caption{Error en la consola del simulador al intentar correr el código tras cambiar la instrucción \mintinline{mips}{addiu} por \mintinline{mips}{addi}}
+    \label{fig:error-overflow}
+\end{figure}
+
+A partir de haber corrido el programa paso a paso, y como también se menciona en el error devuelto por consola, el problema surge en la línea 6 del programa. La causa es advertida como \textit{arithmetic overflow}. Es decir, al sumarle un número positivo (valor inmediato igual a 1) al ya máximo número entero positivo representable (contenido en la palabra a la que apunta la etiqueta \texttt{numero}), el resultado se excede del límite representable, resultando en una excepción de desbordamiento (\textit{overflow}).
+
+Precisamente ésta es la diferencia entre las instrucciones \mintinline{mips}{addi} y \mintinline{mips}{addiu}: ambas permiten sumar un valor inmediato a un registro, pero con la diferencia en que la variante \textbf{no} terminada en \textit{u}, provoca una excepción en el caso de producirse una instancia de \textit{overflow} al llevar a cabo la operación aritmética.
+
+\begin{center}
+    \large\textbf{-- \textsl{Operaciones aritméticas con datos en memoria} --}
+\end{center}
+
+\subsection*{3.4 y 3.5}
+
+El programa en cuestión obtiene el resultado de la resta de los valores a los que apuntan las etiquetas: \texttt{numero1} $-$ \texttt{numero2} $-$ \texttt{numero3}. Esta diferencia se almacena en la palabra a la que apunta \texttt{numero1} al final del programa (\textbf{NO} en \texttt{numero3}, como sugiere el enunciado), mediante la instrucción \mintinline{mips}{sw}.
+
+En este caso, el resultado almacenado en dicha dirección es \textbf{\texttt{0x7ffffffe}}. Sin embargo, considerando que los números con los que operamos están representados como enteros signados, el valor obtenido es \textbf{incorrecto}. Considerando que \texttt{0x80000000} es el mínimo número negativo representable (en decimal, $-2147483648$), restarle 2 ($-1-1$, concretamente) si bien no falla al usar la instrucción \mintinline{mips}{subu}, resulta en un valor que ``salta'' al otro lado de la recta numérica, resultando en un valor correspondiente a un número positivo (en decimal, $2147483646$).
+
+Es por esta situación de desbordamiento que hay diferencia al usar la instrucción \mintinline{mips}{sub} en vez de \mintinline{mips}{subu}. Sustituyendo las instrucciones de esta manera, el programa falla en la línea 9 al ejecutarlo a paso, con un error idéntico al visto en la Figura \ref{fig:error-overflow}. La única diferencia con lo visto en la Cuestión \hyperref[sec:c3-3]{3.3}, es que en este caso el error se produce por sobrepasar el límite del \textit{mínimo número entero signado representable}, en vez del límite del \textit{máximo entero signado representable}, como fue el caso de la Cuestión mencionada.
+
+\begin{center}
+    \large\textbf{-- \textsl{Multiplicación y división con datos en memoria} --}
+\end{center}
+
+\subsection*{3.6}
+
+Después de realizar la operación, se obtiene el resultado de la multiplicación entre los valores contenidos en las palabras a las que apuntan las etiquetas \texttt{numero1} y \texttt{numero2}, es decir, \texttt{0x7fffffff} $\cdot$ 16.
+
+Debido a que el producto entre los dos números en cuestión sobrepasa el límite representable de números positivos signados, la instrucción \mintinline{mips}{mult} permite prescindir del argumento que especifique el registro al que se almacene el resultado (en comparación con \mintinline{mips}{mul}), de forma que se almacene el resultado dividido en dos registros especiales: \mintinline{mips}{$hi} y \mintinline{mips}{$lo}.
+
+Como pueden llegar a sugerir los nombres de estos registros, \mintinline{mips}{$hi} almacena los 4 bytes más significativos del resultado, mientras que \mintinline{mips}{$lo} almacena los 4 menos significativos. Para poder acceder a estos registros especiales, se requiere del uso de las instrucciones \mintinline{mips}{mfhi} y \mintinline{mips}{mflo} respectivamente, las cuales cargarán su valor en un registro especificado como argumento.
+
+Así, para el código dado, el resultado es almacenado en las posiciones \texttt{0x10010008} y \texttt{0x1001000c}, que al concatenarlas nos da el valor \texttt{0x7fffffff0} (en decimal, 4611686014132420609), que como es de esperarse, representa correctamente el producto entre los factores aclarados en el primer párrafo.
+
+Finalizando con una aclaración a lo explicado del resultado del producto, notar que nunca necesitaremos más de dos palabras para almacenarlo, siempre que los factores sean dos números almacenados cada uno en una palabra. Pues el producto más grande posible, \texttt{0x7fffffff} $\cdot$ \texttt{0x7fffffff} (o en decimal, $2147483647 \; \cdot \; 2147483647 = 2147483647^2$), da igual a \texttt{0x3fffffff00000001}, que es menor al mayor número representable con dos palabras (64 bits), \texttt{0x7fffffffffffffff}. {\emergencystretch3em\par}
+
+\subsection*{3.7}
+
+Podemos modificar de forma sencilla el código anterior para que divida el valor en \texttt{numero1} por el de \texttt{numero2}. Luego de cambiar los datos a los que apuntan las etiquetas dichas según lo indica el ejercicio, podemos cambiar la instrucción \mintinline{mips}{mult} por \mintinline{mips}{div}, la cual guarda el resto de la división en el registro especial \mintinline{mips}{$hi}, y el cociente en el registro especial \mintinline{mips}{$lo}.
+
+Como ya leíamos los contenidos de estos registros y los escribíamos a continuación de los números en memoria (por usar \mintinline{mips}{mult} previamente), el único cambio restante es invertir las instrucciones \mintinline{mips}{mflo} y \mintinline{mips}{mfhi} de lugar, con el único propósito de almacenar primero el cociente, y luego el resto en memoria, según se da a entender en el enunciado.
+
+El programa resultante es el siguiente:
+
+\vspace{7pt}
+\inputminted[linenos]{mips}{src/cuestiones/c3-7.asm}
+\vspace{7pt}
+
+\begin{center}
+    \large\textbf{-- \textsl{Operaciones lógicas} --}
+\end{center}
+
+\subsection*{3.8}
+
+
 
 \chapter{Problemas}
 
