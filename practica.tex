@@ -871,15 +871,16 @@ Considerando que al desplazar \texttt{numero} 4 posiciones a la derecha lo quisi
     \centering
     \captionsetup{justification = centering}
     \begin{tabular}{l c c c l}
-        \texttt{numero} &=& \texttt{0xffffff41} &=& -191 \\
-        \mintinline{mips}{$t1} (\mintinline{mips}{sra}) &=& \texttt{0xfffffff4} &=& -12 = $\lfloor\frac{-191}{16}\rfloor$ \\
-        \mintinline{mips}{$t1} (\mintinline{mips}{srl}) &=& \texttt{0x0ffffff4} &=& 268435444
+        \texttt{numero} &=& \texttt{0xffffff41} &=& $-191$ \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{sra}) &=& \texttt{0xfffffff4} &=& $-12$ = $\lfloor\frac{-191}{16}\rfloor$ \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{srl}) &=& \texttt{0x0ffffff4} &=& $268435444$
     \end{tabular}
     \caption{Diferencia en los resultados obtenidos entre desplazar \texttt{numero} con \mintinline{mips}{sra} y \mintinline{mips}{srl}}
     \label{fig:bin-cmp-3-11}
 \end{figure}
 
 \subsection*{3.12 y 3.13}
+\label{sec:c3-13}
 
 Para desplazar el contenido de \texttt{numero} 2 bits a la izquierda, reemplazamos la instrucción \mintinline{mips}{sra} por \mintinline{mips}{sll} y cambiamos el argumento de la cantidad de posiciones que se shiftea:
 
@@ -893,8 +894,8 @@ Si comparamos la representación decimal del número original con el del resulta
     \centering
     \captionsetup{justification = centering}
     \begin{tabular}{l c c c l}
-        \texttt{numero} &=& \texttt{0xffffff41} &=& -191 \\
-        \mintinline{mips}{$t1} (\mintinline{mips}{sll}) &=& \texttt{0xfffffd04} &=& -764 = $-191 \cdot 2^2$ \\
+        \texttt{numero} &=& \texttt{0xffffff41} &=& $-191$ \\
+        \mintinline{mips}{$t1} (\mintinline{mips}{sll}) &=& \texttt{0xfffffd04} &=& $-764$ = $-191 \cdot 2^2$ \\
     \end{tabular}
 \caption{Diferencia entre el número original y el resultado obtenido usando \mintinline{mips}{sll}}
     \label{fig:bin-cmp-3-13}
@@ -1083,7 +1084,7 @@ Hacemos uso de la instrucción \mintinline{mips}{andi} con la constante \texttt{
 
 \inputminted[linenos]{mips}{src/problemas/14.asm}
 
-Tras ejecutar el programa, el entero en la memoria cambia al valor \textbf{\texttt{0xabcd1035}}. Comparando su representación binaria con la del número original, podemos ver cómo cumple con la consigna solicitada.
+Tras ejecutar el programa, el entero en la memoria cambia al valor \textbf{\texttt{0xabcd1035}}. Comparando su representación binaria con la del número original, podemos ver cómo cumple con la consigna solicitada (Fig. \ref{fig:bin-cmp-14}).
 
 \begin{figure}[H]
     \centering
@@ -1093,11 +1094,49 @@ Tras ejecutar el programa, el entero en la memoria cambia al valor \textbf{\text
         \texttt{0xabcd1035} &=& \texttt{10101011 11001101 000100\textcolor{red}{0}0 \textcolor{red}{0}011\textcolor{red}{0}101} \\[-3pt]
                             && \myrepeat{24}{\phantom{\texttt{0}}}{\scriptsize{}\;\!9}\myrepeat{2}{\phantom{\texttt{0}}}\;\!{\scriptsize{}7}\myrepeat{3}{\phantom{\texttt{0}}}\;\!{\scriptsize{}3}
     \end{tabular}
-    \caption{Diferencia entre el número original y el modificado tras ejecutar el programa anterior}
+    \caption{Diferencia entre el número original y el modificado tras ejecutar el programa anterior usando la instrucción \mintinline{mips}{andi}}
+    \label{fig:bin-cmp-14}
 \end{figure}
 
 \section{}
 
+Interpretando que ``cambiar'' el valor de los bits del entero implica invertir su estado original, podemos usar la instrucción \mintinline{mips}{xori}, que hace el \texttt{XOR} binario con un valor inmediato dado. Utilizaremos la constante \texttt{0x288} para esta operación, ya que tiene los bits 3, 7 y 9 encendidos, de forma que puedan cambiarse en el número original.
+
+\inputminted[linenos]{mips}{src/problemas/15.asm}
+
+Después de correr el programa, el valor de la palabra es \textbf{\texttt{0xff0f10bd}}, el cual podemos comprobar que cumple con la consigna, comparando su representación binaria con la del número original (Fig. \ref{fig:bin-cmp-15}).
+
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l c l}
+        \texttt{0xff0f1235} &=& \texttt{11111111 00001111 000100\textcolor{red}{1}0 \textcolor{red}{0}011\textcolor{red}{0}101} \\
+        \texttt{0xff0f10bd} &=& \texttt{11111111 00001111 000100\textcolor{red}{0}0 \textcolor{red}{1}011\textcolor{red}{1}101} \\[-3pt]
+                            && \myrepeat{24}{\phantom{\texttt{0}}}{\scriptsize{}\;\!9}\myrepeat{2}{\phantom{\texttt{0}}}\;\!{\scriptsize{}7}\myrepeat{3}{\phantom{\texttt{0}}}\;\!{\scriptsize{}3}
+    \end{tabular}
+    \caption{Diferencia entre el número original y el modificado tras ejecutar el programa anterior usando la instrucción \mintinline{mips}{xori}}
+    \label{fig:bin-cmp-15}
+\end{figure}
+
+\section{}
+
+Sabiendo que el número por el cual debemos multiplicar el dato almacenado en memoria, es una potencia de 2, podemos utilizar lo visto en la Cuestión \hyperref[sec:c3-13]{3.13} y usar la instrucción \mintinline{mips}{sll} shifteándolo 5 posiciones a la izquierda (pues $32 = 2^5$).
+
+\inputminted[linenos]{mips}{src/problemas/16.asm}
+
+Comparando las representaciones decimales del número original y el resultado obtenido, podemos confirmar que el programa anterior resuelve el problema propuesto (Fig. \ref{fig:bin-16}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{c c l}
+        \texttt{0x00001237} &=& $4663$ \\
+        \texttt{0x000246e0} &=& $149216$ = $4663 \cdot 2^5$ \\
+    \end{tabular}
+    \caption{Diferencia entre el número original y el resultado obtenido usando \mintinline{mips}{sll}}
+    \label{fig:bin-16}
+\end{figure}
 
 
 \end{document}
