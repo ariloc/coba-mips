@@ -37,6 +37,16 @@
 
 \xpretocmd{\chapter}{\setcounter{section}{0}}{}{}
 
+\makeatletter
+\newcount\my@repeat@count
+\newcommand{\myrepeat}[2]{%
+    \begingroup
+    \my@repeat@count=\z@
+    \@whilenum\my@repeat@count<#1\do{#2\advance\my@repeat@count\@ne}%
+    \endgroup
+}
+\makeatother
+
 \unaccentedoperators
 
 \definecolor{autumn-red-pyg}{HTML}{AA0000}
@@ -843,6 +853,7 @@ El valor resultante de la ejecución del programa es \textbf{\texttt{0x0003ffff}
 \end{center}
 
 \subsection*{3.10, 3.11 y 3.14}
+\label{sec:c3-11}
 
 Vemos que a pesar de haber realizado una operación de desplazamiento de bits a la derecha, si bien los bits menos significativos correspondientes fueron descartados, los 4 bits más significativos fueron rellenados con el valor 1. En concreto, estos últimos bits fueron rellenados acorde al bit de signo (el más significativo), el cual está prendido para el caso del valor al que apunta \texttt{numero} en nuestro programa. El valor almacenado en \mintinline{mips}{$t1} tras ejecutar el programa es \texttt{0xfffffff4}.
 
@@ -885,11 +896,15 @@ Si comparamos la representación decimal del número original con el del resulta
         \texttt{numero} &=& \texttt{0xffffff41} &=& -191 \\
         \mintinline{mips}{$t1} (\mintinline{mips}{sll}) &=& \texttt{0xfffffd04} &=& -764 = $-191 \cdot 2^2$ \\
     \end{tabular}
-    \caption{Diferencia entre el número original y el resultado obtenido usando \mintinline{sll}}
+\caption{Diferencia entre el número original y el resultado obtenido usando \mintinline{mips}{sll}}
     \label{fig:bin-cmp-3-13}
 \end{figure}
 
-% TODO: Hablar de por qué no existe sla, usamos sll, ver operación lógica, no necesitamos la otra(?)
+Notar que usamos la instrucción \mintinline{mips}{sll}, finalizada en \textit{l}, indicando que es una operación del tipo \textit{lógica}, y no \textit{aritmética} como distinguimos en la Cuestión \hyperref[sec:c3-11]{3.11}. Esto se debe a que \textbf{no existe} una instrucción tal como ``\texttt{sla}'', pues simplemente \textbf{no es necesaria}.
+
+Recordemos que el inconveniente que surgía de usar el desplazamiento de bits lógico hacia la derecha, era que no se preservaba el bit de signo. En cambio, al realizar shifts hacia la izquierda, el signo se preserva. Si bien los bits más significativos en las $n$ posiciones de mayor peso son descartados (desplazando $n$ posiciones), los bits en las posiciones subsiguientes ocuparán su lugar manteniendo el signo según sea acorde.
+
+Por supuesto, habrá un punto en el que, por ejemplo, si tenemos un número negativo, al desplazar bits exista la posibilidad de que quede un 0 en la posición del bit de signo, según cómo sea la representación binaria del número tratado. Pero ya para este punto, o incluso para varios shifts antes, el valor obtenido habría superado el límite representable por un número entero signado de 32 bits, requiriendo otro tipo de medidas para poder almacenar el resultado.
 
 \chapter{Problemas}
 
@@ -1003,7 +1018,7 @@ Cabe mencionar que como los números del vector son menores al máximo número r
 
 Podemos extender el programa del ejercicio anterior y utilizar la instrucción \mintinline{mips}{sw} para cargar los valores que ya tenemos dentro de los registros \mintinline{mips}{$s0}-\mintinline{mips}{$s4}, en las palabras empezando desde la dirección \texttt{0x10010000}.
 
-Además, podemos intentar optimizar la cantidad de instrucciones reales que usa nuestro programa, lo cual considerando que MIPS es del tipo \textit{RISC} (donde cada instrucción real se ejecuta en un ciclo del procesador), ayudaría a la velocidad de nuestro programa. Por supuesto que con un programa tan pequeño, más aún corriendo en un simulador, no tiene mucho sentido optimizar la velocidad de ejecución del código. Sin embargo, resulta interesante explorar las distintas opciones y usos de las instrucciones ya vistas, para cumplir el objetivo del ejercicio.
+Además, podemos intentar optimizar la cantidad de instrucciones reales que usa nuestro programa, lo cual podría ayudar a la velocidad de nuestro programa. Por supuesto que con un programa tan pequeño, más aún corriendo en un simulador, no tiene mucho sentido optimizar la velocidad de ejecución del código. Sin embargo, resulta interesante explorar las distintas opciones y usos de las instrucciones ya vistas, para cumplir el objetivo del ejercicio.
 
 \inputminted[linenos]{mips}{src/problemas/8.asm}
 
@@ -1038,5 +1053,51 @@ Considerando que los 4 bytes se encuentran a partir de la dirección de memoria 
 Además, cargamos las direcciones de memoria del vector almacenado y el espacio de memoria reservados con la instrucción \mintinline{mips}{la} en dos registros, para reducir la cantidad de operaciones según lo describimos en el \hyperref[sec:p8]{Problema 8}.
 
 \inputminted[linenos]{mips}{src/problemas/11.asm}
+
+\section{}
+
+\inputminted[linenos]{mips}{src/problemas/12.asm}
+
+\section{}
+
+La opción más sencilla para resolver el ejercicio sería realizar la misma serie de pasos para cada número del vector:
+
+\begin{itemize}
+    \item Cargar el valor del vector en un registro.
+    \item Realizar la división con el número 5 en un registro donde fue precargado.
+    \item Leer el resultado del registro especial \mintinline{mips}{mflo}.
+    \item Escribir el resultado en memoria.
+\end{itemize}
+
+\inputminted[linenos]{mips}{src/problemas/13a.asm}
+
+También podemos explorar nuevos horizontes y usar branching consultando con la documentación:
+
+\inputminted[linenos]{mips}{src/problemas/13b.asm}
+
+Como siempre, probablemente existan otras formas más prácticas o más eficientes de realizar la tarea. Por ejemplo, seguramente se podría hacer uso de algún contador, en vez de comparar que la dirección de memoria de donde leemos el vector no pase de la posición del último número.
+
+\section{}
+
+Hacemos uso de la instrucción \mintinline{mips}{andi} con la constante \texttt{0xfffffd77} que tiene todos los bits menos el 3, 7 y 9, establecidos en 1, manteniendo así el resto de bits del entero original, y apagando los exceptuados:
+
+\inputminted[linenos]{mips}{src/problemas/14.asm}
+
+Tras ejecutar el programa, el entero en la memoria cambia al valor \textbf{\texttt{0xabcd1035}}. Comparando su representación binaria con la del número original, podemos ver cómo cumple con la consigna solicitada.
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification = centering}
+    \begin{tabular}{l c l}
+        \texttt{0xabcd12bd} &=& \texttt{10101011 11001101 000100\textcolor{red}{1}0 \textcolor{red}{1}011\textcolor{red}{1}101} \\
+        \texttt{0xabcd1035} &=& \texttt{10101011 11001101 000100\textcolor{red}{0}0 \textcolor{red}{0}011\textcolor{red}{0}101} \\[-3pt]
+                            && \myrepeat{24}{\phantom{\texttt{0}}}{\scriptsize{}\;\!9}\myrepeat{2}{\phantom{\texttt{0}}}\;\!{\scriptsize{}7}\myrepeat{3}{\phantom{\texttt{0}}}\;\!{\scriptsize{}3}
+    \end{tabular}
+    \caption{Diferencia entre el número original y el modificado tras ejecutar el programa anterior}
+\end{figure}
+
+\section{}
+
+
 
 \end{document}
