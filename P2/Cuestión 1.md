@@ -4,15 +4,17 @@ Se carga el valor 1, pues 30 < 40.
 #### 1.2)
 Cambiamos el programa para cargar los valores mencionados, quedando de la siguiente forma:
 
-                .data
-    dato1:      .word 50
-    dato2:      .word 20
-    res:        .space 1
-                .text
-                lw $t0, dato1($0)
-                lw $t1, dato2($0)
-                slt $t2, $t0, $t1
-                sb $t2, res($0)
+```assembly
+            .data
+dato1:      .word 50
+dato2:      .word 20
+res:        .space 1
+            .text
+            lw $t0, dato1($0)
+            lw $t1, dato2($0)
+            slt $t2, $t0, $t1
+            sb $t2, res($0)
+```
 
 Efectivamente, 50 > 20, por que la condición no se cumple, y ahora se carga un 0 en la posición de memoria res.
 
@@ -23,15 +25,17 @@ Luego, en el 1.2, se compara 50 < 20, que es falso.
 #### 1.4)
 Podemos modificar el código nuevamente para almacenar un 1 en res si dato1 y dato2 son iguales:
 
-                .data
-    dato1:      .word 30
-    dato2:      .word 30
-    res:        .space 1
-                .text
-                lw $t0, dato1($0)
-                lw $t1, dato2($0)
-                seq $t2, $t0, $t1
-                sb $t2, res($0)
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word 30
+res:        .space 1
+            .text
+            lw $t0, dato1($0)
+            lw $t1, dato2($0)
+            seq $t2, $t0, $t1
+            sb $t2, res($0)
+```
 
 Además cambiamos el valor de dato2 para comprobar que al ejecutar el programa, se almacena el valor 1 en la posición de memoria res.
 
@@ -43,17 +47,19 @@ De esta forma, si se cumple que (dato1 >= dato2) con sge, y (dato1 <= dato2) con
 Para escribir un 1 si se cumplen ambas condiciones, haremos uso de la instrucción and.
 Con esto en cuenta, el código queda de la siguiente forma:
 
-                .data
-    dato1:      .word 30
-    dato2:      .word 30
-    res:        .space 1
-                .text
-                lw $t0, dato1($0)
-                lw $t1, dato2($0)
-                sge $t2, $t0, $t1
-                sle $t3, $t0, $t1
-                and $t2, $t2, $t3 
-                sb $t2, res($0)
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word 30
+res:        .space 1
+            .text
+            lw $t0, dato1($0)
+            lw $t1, dato2($0)
+            sge $t2, $t0, $t1
+            sle $t3, $t0, $t1
+            and $t2, $t2, $t3 
+            sb $t2, res($0)
+```
 
 Tras probar comparar 30 con los valores 29, 30 y 31, podemos ver que efectivamente, sólo se guarda un 1 en res si los números son iguales (30 y 30).
 
@@ -81,45 +87,51 @@ En conclusión, se evalúa que (dato1 <= dato2).
 #### 1.10)
 Podemos evaluar esta misma comparación con la pseudoinstrucción sle, quedándonos el código de la siguiente forma:
 
-                .data
-    dato1:      .word 20
-    dato2:      .word 20
-    res:        .space 1
-                .text
-    main:       lw $t0, dato1($0) 
-                lw $t1, dato2($0)
-                sle $t2, $t0, $t1 
-    fineval:    sb $t2, res($0) 
+```assembly
+            .data
+dato1:      .word 20
+dato2:      .word 20
+res:        .space 1
+            .text
+main:       lw $t0, dato1($0) 
+            lw $t1, dato2($0)
+            sle $t2, $t0, $t1 
+fineval:    sb $t2, res($0)
+```
 
 #### 1.11)
 Modificamos el código original para cumplir con la consigna:
 
-                .data
-    dato1:      .word 50
-    dato2:      .word 50
-    res:        .space 1
-                .text
-    main:       lw $t0, dato1($0)
-                lw $t1, dato2($0)
-                sgt $t2, $t0, $t1
-                bne $t0, $t1, fineval
-                ori $t2, $0, 1
-    fineval:    sb $t2, res($0)
+```assembly
+            .data
+dato1:      .word 50
+dato2:      .word 50
+res:        .space 1
+            .text
+main:       lw $t0, dato1($0)
+            lw $t1, dato2($0)
+            sgt $t2, $t0, $t1
+            bne $t0, $t1, fineval
+            ori $t2, $0, 1
+fineval:    sb $t2, res($0)
+```
 
 Como podemos ver, tan solo debemos cambiar la instrucción slt por sgt.
 
 #### 1.12)
 También es más sencillo usar directamente la pseudoinstrucción sge:
 
-                .data
-    dato1:      .word 50
-    dato2:      .word 50
-    res:        .space 1
-                .text
-    main:       lw $t0, dato1($0)
-                lw $t1, dato2($0)
-                sge $t2, $t0, $t1
-    fineval:    sb $t2, res($0)
+```assembly
+            .data
+dato1:      .word 50
+dato2:      .word 50
+res:        .space 1
+            .text
+main:       lw $t0, dato1($0)
+            lw $t1, dato2($0)
+            sge $t2, $t0, $t1
+fineval:    sb $t2, res($0)
+```
 
 #### 1.13)
 Al ejecutar el programa, vemos que se carga el valor 1 en la posición de memoria res.
@@ -156,21 +168,23 @@ Si cambiamos el segundo argumento de la segunda instrucción beq, de $0 a $t8, d
 Luego el and del código original verificaría que las dos condiciones se cumplen.
 Así, el código modificado resulta de la siguiente forma:
 
-                .data
-    dato1:      .word 40
-    dato2:      .word -50
-    res:        .space 1
-                .text
-    main:       lw $t8, dato1($0)
-                lw $t9, dato2($0)
-                and $t0, $t0, $0
-                and $t1, $t1, $0
-                beq $t8, $0, igual
-                ori $t0, $0, 1
-    igual:      beq $t9, $t8, fineval
-                ori $t1, $0, 1
-    fineval:    and $t0, $t0, $t1
-                sb $t0, res($0)
+```assembly
+            .data
+dato1:      .word 40
+dato2:      .word -50
+res:        .space 1
+            .text
+main:       lw $t8, dato1($0)
+            lw $t9, dato2($0)
+            and $t0, $t0, $0
+            and $t1, $t1, $0
+            beq $t8, $0, igual
+            ori $t0, $0, 1
+igual:      beq $t9, $t8, fineval
+            ori $t1, $0, 1
+fineval:    and $t0, $t0, $t1
+            sb $t0, res($0)
+```
 
 #### 1.19)
 Tras ejecutar el programa, se carga el valor 1 en la posición de memoria res.
@@ -201,21 +215,23 @@ Podemos lograr la consigna con dos simples modificaciones:
 
 El código resulta de la siguiente forma:
 
-                .data
-    dato1:      .word 0
-    dato2:      .word -20
-    res:        .space 1
-                .text
-    main:       lw $t8, dato1($0)
-                lw $t9, dato2($0)
-                and $t1, $t1, $0
-                and $t0, $t0, $0
-                beq $t8, $t9, igual
-                ori $t0, $0, 1
-    igual:      slt $t1, $t9, $t8
-                xori $t1, $t1, 1
-    fineval:    and $t0, $t0, $t1
-                sb $t0, res($0)
+```assembly
+            .data
+dato1:      .word 0
+dato2:      .word -20
+res:        .space 1
+            .text
+main:       lw $t8, dato1($0)
+            lw $t9, dato2($0)
+            and $t1, $t1, $0
+            and $t0, $t0, $0
+            beq $t8, $t9, igual
+            ori $t0, $0, 1
+igual:      slt $t1, $t9, $t8
+            xori $t1, $t1, 1
+fineval:    and $t0, $t0, $t1
+            sb $t0, res($0)
+```
 
 #### 1.24)
 [Interpetando "el código anterior", como lo propuesto en el #### 1.23), siendo que la consigna no es del todo clara, además que es interesante proponer la alternativa de usar not en el ejercicio anterior]
@@ -226,20 +242,22 @@ Así estamos directamente almacenando un 1 en $t0 si $t8 <= $t9 (dato1 <= dato2)
 
 Entonces, el código resulta de la siguiente forma:
 
-                .data
-    dato1:      .word 0
-    dato2:      .word -20
-    res:        .space 1
-                .text
-    main:       lw $t8, dato1($0)
-                lw $t9, dato2($0)
-                and $t1, $t1, $0
-                and $t0, $t0, $0
-                beq $t8, $t9, igual
-                ori $t0, $0, 1
-    igual:      sle $t1, $t8, $t9
-    fineval:    and $t0, $t0, $t1
-                sb $t0, res($0)
+```assembly
+            .data
+dato1:      .word 0
+dato2:      .word -20
+res:        .space 1
+            .text
+main:       lw $t8, dato1($0)
+            lw $t9, dato2($0)
+            and $t1, $t1, $0
+            and $t0, $t0, $0
+            beq $t8, $t9, igual
+            ori $t0, $0, 1
+igual:      sle $t1, $t8, $t9
+fineval:    and $t0, $t0, $t1
+            sb $t0, res($0)
+```
 
 #### 1.25)
 Al ejecutar el programa, vemos que se guarda un 0 en la posición de memoria res.
@@ -278,21 +296,23 @@ Cabe aclarar que para usar la instrucción bgtz, debemos prescindir del segundo 
 
 El código resulta entonces de la siguiente forma:
 
-                .data
-    dato1:      .word 30
-    dato2:      .word -20
-    res:        .space 1
-                .text
-    main:       lw $t8, dato1($0)
-                lw $t9, dato2($0)
-                and $t0, $t0, $0
-                and $t1, $t1, $0
-                slt $t0, $t9, $t8
-                xori $t0, 1
-                bgtz $t8, fineval
-                ori $t1, $0, 1
-    fineval:    or $t0, $t0, $t1
-                sb $t0, res($0)
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word -20
+res:        .space 1
+            .text
+main:       lw $t8, dato1($0)
+            lw $t9, dato2($0)
+            and $t0, $t0, $0
+            and $t1, $t1, $0
+            slt $t0, $t9, $t8
+            xori $t0, 1
+            bgtz $t8, fineval
+            ori $t1, $0, 1
+fineval:    or $t0, $t0, $t1
+            sb $t0, res($0)
+```
 
 #### 1.31)
 [Interpretamos que el código anterior es el de la Cuestión 1.30)]
@@ -301,17 +321,19 @@ Podemos simplificar la primera de las modificaciones planteadas usando la instru
 
 Con este cambio, el código resulta de la siguiente forma:
 
-                .data
-    dato1:      .word 30
-    dato2:      .word -20
-    res:        .space 1
-                .text
-    main:       lw $t8, dato1($0)
-                lw $t9, dato2($0)
-                and $t0, $t0, $0
-                and $t1, $t1, $0
-                sle $t0, $t8, $t9
-                bgtz $t8, fineval
-                ori $t1, $0, 1
-    fineval:    or $t0, $t0, $t1
-                sb $t0, res($0)
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word -20
+res:        .space 1
+            .text
+main:       lw $t8, dato1($0)
+            lw $t9, dato2($0)
+            and $t0, $t0, $0
+            and $t1, $t1, $0
+            sle $t0, $t8, $t9
+            bgtz $t8, fineval
+            ori $t1, $0, 1
+fineval:    or $t0, $t0, $t1
+            sb $t0, res($0)
+```
