@@ -126,7 +126,10 @@ Al ejecutar el programa, vemos que se carga el valor 1 en la posición de memori
 El motivo por el cual esto sucede, es que como 40 != 0, la primera instrucción beq NO salta a la etiqueta igual, ejecutándose la siguiente instrucción ori que incondicionalmente guarda un 1 en el registro $t0.
 Similarmente, -50 != 0, por lo que tampoco salta la segunda instrucción beq, incondicionalmente almacenándose un 1 en el registro $t1 por la instrucción ori en la línea siguiente.
 Como $t0 y $t1 tienen un 1, el and almacena un 1 en $t0, el cual luego se almacena en la posición de memoria res.
-![Diagrama de flujo](diagrama1.jpg)
+
+<div align="center">
+    <img width="50%" src="diagrama1.jpg"></img>
+</div>
 
 #### 1.14)
 Cambiando los valores del programa según se especifica, esta vez se almacena el valor 0 en la posición res.
