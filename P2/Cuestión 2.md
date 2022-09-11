@@ -210,3 +210,141 @@ Luego, como debemos almacenar la resta entre los números, podemos obtener el op
     <b>FinSi</b>
 <b>FIN</b>
 </pre>
+
+#### 2.17)
+
+Tras ejecutar el programa, el valor almacenado en "res" es **1**. También así sucede si intercambiamos los valores de los primeros dos datos.
+
+Como "dato3" = -1, en ambos casos "dato3" < "dato1" (pues tanto "dato1" como "dato2" son positivos). En consecuencia, siempre se cumple la condición en la instrucción `blt`, que salta a la etiqueta "entonces", estableciendo el valor del registro `$t4` en 1, el cual luego se almacenará en "res".
+
+#### 2.18)
+
+Una vez más, con algunas modificaciones al código visto en la [Cuestión 2.16](#216), podemos implementar el programa descrito en Assembly:
+
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word 40
+dato3:      .word -1
+res:        .space 4
+            .text
+main:       lw $t1, dato1($0)
+            lw $t2, dato2($0)
+            lw $t3, dato3($0)
+Si:         blt $t3, $t1, sino      # if dato3 < dato1, the condition is not met
+            bgt $t3, $t2, sino      # if dato3 > dato2, the condition is not met
+entonces:   addi $t4, $0, 1
+            j finsi
+sino:       and $t4, $0, $0
+finsi:      sw $t4, res($0)
+```
+
+Para hacer cumplir ambas condiciones como si fuera un _and_ en vez de un _or_ como era antes, ambas instrucciones de branch deberán saltar a la etiqueta "sino". Luego, como éstas llevan a ejecutar el código cuando **no** se cumple la condición, deben de evaluar el criterio _opuesto_ al establecido en el _Si_.
+
+Por lo tanto, la primera instrucción `blt` verifica si ("dato3" < "dato1"), ya que si así fuera, entonces NO se cumpliría que ("dato3" >= "dato1") como se especifica en el pseudocódigo, entonces llevando directamente a la instrucción posterior a la etiqueta "sino".
+
+Mientras, si esta condición **no** se cumpliera (es decir, **sí** se cumple la que deseamos para el _Si_), se evaluaría la segunda instruccioón de branch, `bgt`, que verifica si ("dato3" > "dato2"). Si este fuera el caso, no se cumpliría que ("dato3" <= "dato2"), por lo que una vez más, nos lleva a ejecutar el caso "sino".
+
+Si esta condición tampoco se cumpliera (es decir, **sí** se cumple la que queremos para el _Si_), entonces ambas condiciones se hubieran cumplido como las queremos, ejecutándose las líneas posteriores a la etiqueta "entonces".
+
+Por todo lo explicado, el programa anterior implementa aquel descrito en el enunciado en "lenguaje algorítmico".
+
+#### 2.19)
+
+Las funciones de cada una de las instrucciones que cumplen el programa son:
+
+- **`la`**: Carga la dirección de memoria del primer caracter de "cadena" en el registro `$t0`.
+- **`andi`**: Establece el valor en el registro `$t2` = 0.
+- **`lb`**: Carga desde la memoria el byte correspondiente al caracter de "cadena" al cual apunta el registro `$t0`. En el primer ciclo del _while_, este será el primer caracter, luego el segundo en el ciclo siguiente, y así sucesivamente.
+- **`beq`**: Saltará por fuera del ciclo actual de la estructura _while_ (efectivamente terminando con las iteraciones de esta estructura), bajo la condición que el byte leído de "cadena" en `$t1` sea = 0. Este será el caso si se llega al fin de la cadena, concretamente al caracter posterior al último, conocido como _terminador_.  Sabiendo que los carateres se representan numéricamente en la memoria con su equivlente en ASCII, no habrá otro caracter más allá del terminador que tenga el valor 0 en ASCII. Incluso el caracter "0" realmente tiene el número 48 en ASCII. Podemos también comprobar por la existencia de este terminador, observando la disposición de la memoria del código ensamblado: a pesar de la cadena "hola" ocupar 4 bytes (1 por cada caracter), usando la directiva `.align 2`, el espacio de "n" se alinea desde la dirección de memoria `0x10010008`, en vez de la `0x10010008`, mostrando la existencia de un quinto byte con valor `0x00` en la dirección `0x10010004`.
+- **`addi`**: Las dos instrucciones `addi` suman un 1 a los registros `$t2` y `$t0`. Como `$t0` es una dirección de memoria que apunta inicialmente al primer caracter de "cadena", esta suma lo desplazará a apuntar al segundo caracter de "cadena", y así luego con los caracteres subsiguientes para los próximos ciclos de la estructura _while_. Mientras, sumarle un 1 a `$t2`, que originalmente comienza = 0, hará que éste mantenga la cantidad de ciclos realizados hasta este punto.
+- **`j`**: Esta instrucción salta incondicionalmente de vuelta al comienzo de la estructura _while_, a la etiqueta "mientras", donde se lee el próximo byte de la cadena y se comprueba la condición.
+- **`sw`**: Finalmente, esta última instrucción almacenará el valor acumulado en `$t2`, la cantidad de iteraciones realizadas, en la posición de memoria "n".
+
+#### 2.20)
+
+En conclusión, en "n" se almacena la cantidad de iteraciones realizadas por la estructura _while_ en el código Assembly. Esta cantidad de vueltas es equivalente al largo de "cadena", ya que la condición para que deje de ejecutarse la estructura es que el caracter encontrado sea igual a 0, es decir, llegar al terminador, el final de la cadena tras haberla recorrido caracter por caracter.
+
+En concreto, para este caso, el valor almacenado en la posición de memoria "n" es **4**, pues precisamente, "cadena" tiene un largo de 4 caracteres.
+
+#### 2.21)
+
+Debido a las numerosas diferencias entre lo implementado en el código Assembly original, con lo que se nos requiere implementar en el ejercicio, no mencionaremos las modificaciones necesarias para llegar a la solución:
+
+```assembly
+                .data
+tira1:          .asciiz "hola"
+tira2:          .asciiz "adios"
+                .align 2
+n:              .space 4
+
+                .text
+main:           la $t0, tira1
+                la $t1, tira2
+                andi $t3, $t3, 0
+        
+mientras:       lb $t2, 0($t0)
+                beq $t2, $0, finmientras    # tira1[i] = 0?
+                lb $t2, 0($t1)
+                beq $t2, $0, finmientras    # tira2[i] = 0?
+        
+                addi $t3, $t3, 1
+                addi $t0, $t0, 1
+                addi $t1, $t1, 1
+                j mientras
+        
+finmientras:    sw $t3, n($0)
+```
+
+#### 2.22)
+
+> **CORRECCIÓN DEL EJERCICIO:** El código Assembly provisto inicializa el valor de `$t1` en 6, cuando realmente debería ser 5. Si bien los resultados no cambian, porque un ciclo adicional del _for_ sólo suma 0 dado que la memoria se limpia cada vez que se ensambla un nuevo programa, este último ciclo es innecesario. Por lo tanto, consideraremos para la resolución de las Cuestiones posteriores, que el código hace la cantidad de iteraciones justa para el largo de "vector".
+
+El rol de cada una de las instrucciones que componen el programa son las siguientes:
+
+- **`la`**: Carga en el registro `$t2` la dirección de memoria del primer elemento de "vector".
+- **`and`**: Inicializa el valor del registro `$t3` en 0.
+- **`li`**: Ambas instrucciones `li` cargan los valores 0 y 5 en los registros `$t0` y `$t1` respectivamente.
+- **`bgt`**: Comprueba la condición del _for_, y romperá con el ciclo actual en el caso en el que (`$t0` > `$t1`). Es decir, cuando el valor de `$t0`, el contador de iteraciones de la estructura, supere a la cantidad establecida en el registro `$t1` (en este caso, 5), entonces allí la instrucción `bgt` saltará por fuera de la estructura del _for_, a la etiqueta "finpara". Dado que `$t0` comienza en 0, y que cumple la condición evaluada cuando `$t1` > 5, entonces se realizarán 6 iteraciones: desde la 0° a la 5°. Por esto, en el pseudocódigo, decimos "Para i=0 hasta 5...".
+- **`lw`**, En cada iteración, carga en el registro `$t4` el valor del número ubicado en la posición del vector a la que apunta `$t2`. Como ya veremos que `$t2` avanza de a 4, implica que `$t4` tendrá el valor de "vector" en la `$t0`-ésima posición.
+- **`add`**: El registro `$t3`, originalmente inicializado en 0, mantendrá el resultado de la suma de los elementos del vector. En cada iteración, esta instrucción hace que se le sume el valor de `$t4`, el valor del vector en la posición correspondiente al número de iteración del _for_. Como esta estructura se ejecuta desde las posiciones 0 a la 5, todos los elementos del vector efectivamente serán sumado a `$t3`.
+- **`addi`**: Ambas instrucciones `addi` incrementan en 4 y 1 los registros `$t2` y `$t0` respectivamente. Por un lado, el registro `$t2` debe de saltar de a 4, el tamaño en bytes de una palabra, ya que este apunta al próximo elemento de "vector" en la siguiente iteración (y los elementos de vector son números los cuales cada uno ocupa el espacio de una palabra). Mientras, por otro lado, `$t0` toma el rol del contador de la cantidad de iteraciones realizadas hasta este punto, por lo que debe de ir incrementando de a 1.
+- **`j`**: Salta incondicionalmente a la etiqueta "para", donde se ejecutará la condición para el nuevo valor del contador `$t0`, y se determinará si se debe terminar con los ciclos o continuar por una nueva iteración.
+- **`sw`**: Una vez finalizado el _for_, el registro `$t3` contiene la suma de todos los números de "vector". Esta instrucción almacena este resultado en la posición de memoria "res".
+
+#### 2.23)
+
+Con lo visto en la anterior Cuestión, y tras ejecutar el programa, vemos que se almacena el valor **`0x29`** en la posición "res", o en decimal, el número **41**.
+
+Ya habiendo dejado más que en claro que el valor almacenado en "res" es la suma de los valores del vector, podemos comprobarlo verificando que 6 + 7 + 8 + 9 + 10 + 1 = 41.
+
+#### 2.24)
+
+```assembly
+            .data
+v1:         .word 6,7,8,9,10,-1,34,23
+v2:         .space 32
+
+            .text
+main:       la $t0, v1
+            la $t1, v2
+            and $t2, $t2, $0        # i
+            li $t3, 7               # n-1
+        
+para:       bgt $t2, $t3, finpara   # i > n-1?
+            lw $t4, 0($t0)          # <- v1[i]
+            addi $t4, $t4, 1        # v1[i]+1
+            sw $t4, 0($t1)          # -> v2[i]
+            addi $t0, $t0, 4
+            addi $t1, $t1, 4
+            addi $t2, $t2, 1        # i+1
+            j para
+        
+finpara:
+```
+
+Podemos comprobar que nuestro programa funciona revisando el contenido de la memoria. Como podemos ver, en la primera fila se encuentran los valores originales de "v1", y en la segunda los valores incrementados en 1:
+
+<div align="center">
+    <img src="img2.png"></img>
+</div>
