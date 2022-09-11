@@ -142,4 +142,71 @@ finsi:      add $t3, $t0, $t1
 
 #### 2.12)
 
+<pre>
+<b>VARIABLES</b>
+    <b>ENTERO</b>: dato1=30; dato2=40; res;
+<b>INICIO</b>
+    <b>Si</b> (dato1 < dato2)
+        res = dato1;
+    <b>Sino</b>
+        res = dato2;
+    <b>FinSi</b>
+<b>FIN</b>
+</pre>
 
+#### 2.13)
+
+Tras ejecutar el programa, el valor almacenado es "res" es **`0x1e`**, o en decimal, **30**.
+En cambio, cuando "dato1" = 35, el valor almacenado en "res" es **`0x23`**, o en decimal, **35**.
+
+Como podemos ver, en ambos casos se almacena el valor de "dato1" en la posición de memoria "res". Esto se debe a que, como ya vimos en el la Cuestión anterior, si "dato1" < "dato2", se almacena "dato1" en "res". Como tanto 30 < 40, y 35 < 40, entonces en ambos casos de guardó el valor de "dato1", dentro de la posición "res".
+
+#### 2.14)
+
+Analizando las instrucciones del panel de segmento de texto, tras haber ensamblado el programa, podemos identificar las instrucciones que implementan la pseudoinstrucción `bge`.
+
+<div align="center">
+    <img src="img1.png"></img>
+</div>
+
+Como se puede apreciar en la imagen, `bge` lo implementan las instrucciones `slt` y `beq`.
+
+Primero, se almacena en el registro temporal del ensamblador `$at` (`$1`), el resultado de comprobar si (`$t0` < `$t1`). Luego, si este no es el caso, entonces claramente se cumple que (`$t0` >= `$t1`). Por lo tanto, con la instrucción `beq`, se verifica que el resultado de la comparación sea 0 (usando el registro `$0`), de forma tal que se salte a la etiqueta "sino", bajo la condición establecida por `bge`.
+
+#### 2.15)
+
+Debido a las diferencias entre el programa descrito y el código anteriormente visto, las modificaciones para adaptarlo al ejercicio son más significativas. Por lo tanto, nos tomaremos una mayor libertad para poder implementarlo:
+
+```assembly
+            .data
+dato1:      .word 30
+dato2:      .word 40
+res:        .space 4
+            .text
+main:       lw $t0, dato1($0)
+            lw $t1, dato2($0)
+Si:         blt $t0, $t1, sino
+entonces:   sub $t1, $0, $t1       # opposite of dato1
+            j finsi
+sino:       sub $t0, $0, $t0       # opposite of dato2
+finsi:      add $t0, $t0, $t1
+            sw $t0, res($0)
+```
+
+En resumen, primero debemos modificar la comparación del "Si", usando la instrucción `blt` que saltará cuando "dato1" < "dato2", es decir, el "entonces" se ejecutará cuando "dato1" >= "dato2".
+
+Luego, como debemos almacenar la resta entre los números, podemos obtener el opuesto del número que reste en cada caso haciendo la cuenta 0 - "datoX" con la instrucción `sub`. Así, sumarlos luego con la instrucción `add` es equivalente a guardar la resta entre los datos, según corresponda.
+
+#### 2.16)
+
+<pre>
+<b>VARIABLES</b>
+    <b>ENTERO</b>: dato1=30; dato2=40; dato3=-1; res;
+<b>INICIO</b>
+    <b>Si</b> ((dato3 < dato1) or (dato3 > dato2))
+        res = 1;
+    <b>Sino</b>
+        res = 0;
+    <b>FinSi</b>
+<b>FIN</b>
+</pre>
